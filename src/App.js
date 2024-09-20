@@ -10,7 +10,7 @@ import {
   Select,
   MenuItem,
   Tooltip,
-} from "@mui/material";
+  CircularProgress } from "@mui/material";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import MenuIcon from "@mui/icons-material/Menu";
 import { fetchChildren, fetchData } from "./api";
@@ -47,6 +47,7 @@ const getInitialColumns = (path) => {
 const App = () => {
   const searchParams = new URLSearchParams(window.location.search);
 
+  const [loading, setLoading] = useState(false);
   const [path, setPath] = useState(searchParams.get("path"));
   const [columns, setColumns] = useState(getInitialColumns(path));
   const [dataView, setDataView] = useState("");
@@ -62,6 +63,7 @@ const App = () => {
         .map((col) => col.selected).filter((x) => x !== undefined)
         .join(".")
     );
+    setLoading(true);
     // Fetch columns
     const columnPromises = columnPaths.map((path, idx) =>
       columns[idx].items.length === 0
@@ -86,7 +88,7 @@ const App = () => {
             : column.items,
         }))
       );
-    });
+    }).finally(() => setLoading(false));
 
     // Fetch data
     console.log("blockHeight: " + blockHeight);
@@ -159,15 +161,6 @@ const App = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
       <AppBar position="static" sx={{ bgcolor: "#ed2c2c", zIndex: 1100 }}>
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             VStorage Explorer
           </Typography>
@@ -183,6 +176,7 @@ const App = () => {
                   return newValue;
                 });
               }}
+              disabled={!blockHeight}
               size="small"
               color="inherit"
               aria-label="decrease block height"
@@ -217,6 +211,7 @@ const App = () => {
                 });
               }}
               size="small"
+              disabled={!blockHeight}
               color="inherit"
               aria-label="increase block height"
               sx={{ ml: 0.1 }}
@@ -247,10 +242,26 @@ const App = () => {
         split="horizontal" // or "vertical" based on your layout
         defaultSize="50%"
         minSize={100}
-        maxSize={500}
+        maxSize={400}
         style={{ position: 'relative', width: '100%', height: '100%' }}
       >
         <MillerColumns columns={columns} onItemSelected={handleItemSelected} />
+        {loading && (
+          <Box sx={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            width: '100%', 
+            height: '100%', 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            backgroundColor: 'rgba(255, 255, 255, 0.7)', 
+            zIndex: 1300 
+          }}>
+            <CircularProgress />
+          </Box>
+        )}
         <Box sx={{ position: 'relative' }}>
           <Tooltip title="Copy Data">
             <IconButton

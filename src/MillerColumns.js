@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Box, List, ListItem, ListItemText, InputAdornment, TextField } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 
-const MillerColumns = ({ columns, onItemSelected }) => {
+const MillerColumns = ({ columns, onItemSelected}) => {
   const [filterTexts, setFilterTexts] = useState(Array(columns.length).fill(""));
 
   const debounceTimeouts = useRef([]);
@@ -29,7 +29,7 @@ const MillerColumns = ({ columns, onItemSelected }) => {
   }
 
   return (
-    <Box display="flex" height="100%" width="100%" overflow="hidden" bgcolor="#f7f7f7">
+    <Box display="flex" height="100%" width="100%" overflow="hidden" bgcolor="#f7f7f7" position="relative">
       {fullColumns.map((column, columnIndex) => (
         column.items && column.items.length > 0 && (
           <List
@@ -40,6 +40,7 @@ const MillerColumns = ({ columns, onItemSelected }) => {
               overflowY: "auto",
               borderRadius: "8px",
               backgroundColor: "#ffffff",
+              minHeight: "350px",
               maxHeight: "350px",
               margin: "10px 5px",
               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
@@ -96,6 +97,7 @@ const MillerColumns = ({ columns, onItemSelected }) => {
           </List>
         )
       ))}
+      
     </Box>
   );
 };

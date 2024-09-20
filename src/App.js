@@ -160,7 +160,7 @@ const App = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
-      <AppBar position="static" sx={{ bgcolor: "#ed2c2c", zIndex: 1100 }}>
+      <AppBar position="static" sx={{ bgcolor: "#BB2D40", zIndex: 1100 }}>
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             VStorage Explorer
@@ -177,11 +177,6 @@ const App = () => {
                   return newValue;
                 });
               }}
-              disabled={!blockHeight}
-              size="small"
-              color="inherit"
-              aria-label="decrease block height"
-              sx={{ mr: 0.1 }}
             >
               <RemoveIcon />
             </IconButton>
@@ -196,7 +191,7 @@ const App = () => {
               style={{
                 width: "150px",
                 padding: "5px",
-                borderRadius: "4px",
+                borderRadius: "16px",
                 border: "1px solid #eee", // Lighter border color
                 backgroundColor: "rgba(255, 255, 255, 0.15)",
                 color: "#f0f0f0", // Lighter text color
@@ -224,6 +219,7 @@ const App = () => {
             sx={{
               bgcolor: "rgba(255, 255, 255, 0.15)", // Semi-transparent white background
               height: 32,
+              borderRadius: "16px", // Rounded corners
             }}
             value={apiEndpoint}
             onChange={handleEndpointChange}

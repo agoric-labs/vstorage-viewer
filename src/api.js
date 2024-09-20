@@ -1,24 +1,76 @@
-export const fetchChildren = async (apiEndpoint, path) => {
-  const url = `${apiEndpoint}/agoric/vstorage/children/${path}`;
+const defaultPath = "/custom/vstorage/children/";
+
+export const fetchChildren = async (apiEndpoint, path, blockHeight) => {
+  const url = `${apiEndpoint}`;
+
+  const requestBody = {
+    jsonrpc: "2.0",
+    id: 1,
+    method: "abci_query",
+    params: {
+      path: `${defaultPath}${path ? `${path}` : ''}`,
+      height: blockHeight && blockHeight !== "0" ? blockHeight.toString() : "0",
+    },
+  };
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
     if (!response.ok) throw new Error("Network response was not ok");
-    const { children } = await response.json();
-    return children;
+    const jsonResponse = await response.json();
+    const base64Value = jsonResponse.result.response.value;
+    const decodedValue = JSON.parse(atob(base64Value));
+    return {
+      children: decodedValue.children || [],
+      blockHeight: jsonResponse.result.response.height,
+    };
   } catch (error) {
     console.error("Fetching error:", error);
     return [];
   }
 };
 
-export const fetchData = async (apiEndpoint, path) => {
-  const url = `${apiEndpoint}/agoric/vstorage/data/${path}`;
+export const fetchData = async (apiEndpoint, path, blockHeight) => {
+  const url = `${apiEndpoint}`;
+  const requestBody = {
+    jsonrpc: "2.0",
+    id: 1,
+    method: "abci_query",
+    params: {
+      path: `${defaultPath.replace('/children/', '/data/')}${path ? `${path}` : ''}`,
+      height: blockHeight && blockHeight !== "0" ? blockHeight.toString() : "0",
+    },
+  };
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
     if (!response.ok) throw new Error("Network response was not ok");
-    return await response.json();
+    const jsonResponse = await response.json();
+    console.log("fetchData response:", jsonResponse);
+    if (jsonResponse.result.response.code !== 0) {
+      return null;
+    }
+    const base64Value = jsonResponse.result.response.value;
+    let parsedData = JSON.parse(atob(base64Value));
+    if (typeof parsedData === 'string') {
+      parsedData = JSON.parse(parsedData);
+    }
+    console.log("Parsed data:", parsedData);
+    return {
+      data: parsedData,
+      blockHeight: jsonResponse.result.response.height,
+    };
   } catch (error) {
-    console.error("Fetching data error:", error);
+    console.error("Fetching data error:", error, "Request body:", requestBody);
     return "Failed to fetch data";
   }
 };

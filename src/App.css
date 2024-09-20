@@ -14,3 +14,24 @@
   cursor: row-resize;
   width: auto;
 }
+
+input::placeholder {                                                                                                                         
+  color: #e0e0e0; /* Lighter gray color for better visibility */                                                                                            
+}    
+
+/* Remove default spinner controls in number input */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input:focus {
+  outline: none;
+  border-color: #ccc; /* Neutral color for border */
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); /* White shadow for focus */
+}

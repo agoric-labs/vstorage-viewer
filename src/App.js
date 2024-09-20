@@ -6,12 +6,14 @@ import {
   Toolbar,
   Typography,
   Box,
+  IconButton,
   Select,
   MenuItem,
-  IconButton,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { fetchChildren, fetchData } from "./api";
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import apiEndpoints from "./config";
 import { cleanJSON } from "./utils";
 import SplitPane from 'react-split-pane';
@@ -46,10 +48,10 @@ const App = () => {
   const [path, setPath] = useState(searchParams.get("path"));
   const [columns, setColumns] = useState(getInitialColumns(path));
   const [dataView, setDataView] = useState("");
-  const [apiEndpoint, setApiEndpoint] = useState(
-    apiEndpoints.find((x) => x.value === searchParams.get("endpoint"))?.value ||
-      apiEndpoints[0].value
-  );
+  const [blockHeight, setBlockHeight] = useState("");
+  const [currentBlockHeight, setCurrentBlockHeight] = useState("");
+  const initialEndpoint = searchParams.get("endpoint") || apiEndpoints[0].value;
+  const [apiEndpoint, setApiEndpoint] = useState(initialEndpoint);
 
   useEffect(() => {
     const columnPaths = columns.map((_, idx) =>
@@ -60,7 +62,15 @@ const App = () => {
     );
     // Fetch columns
     const columnPromises = columnPaths.map((path, idx) =>
-      columns[idx].items.length === 0 ? fetchChildren(apiEndpoint, path) : null
+      columns[idx].items.length === 0
+        ? fetchChildren(apiEndpoint, path, blockHeight).then((response) => {
+            if (response) {
+              setCurrentBlockHeight(response.blockHeight);
+              return response.children;
+            }
+            return [];
+          })
+        : null
     );
     Promise.all(columnPromises).then((responses) => {
       setColumns((prevColumns) =>
@@ -77,8 +87,13 @@ const App = () => {
     });
 
     // Fetch data
-    fetchData(apiEndpoint, columnPaths.at(-1)).then((data) => {
-      setDataView(JSON.stringify(cleanJSON(data)));
+    console.log("blockHeight: " + blockHeight);
+    fetchData(apiEndpoint, columnPaths.at(-1), blockHeight).then((response) => {
+      if (response) {
+        console.log("Data received from fetchData:", response.data);
+        setDataView(JSON.stringify(cleanJSON(response.data)));
+        setCurrentBlockHeight(response.blockHeight);
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiEndpoint, path]);
@@ -97,10 +112,25 @@ const App = () => {
   }, [apiEndpoint]);
 
   const handleItemSelected = async (itemName, columnIndex) => {
-    // return if the item is already selected
-    if (columns[columnIndex + 1]?.selected === itemName) return;
+    // Return early if the item is already selected
+    if (columns[columnIndex]?.selected === itemName) return;
 
     setDataView("");
+    const newColumns = columns.slice(0, columnIndex + 1);
+    newColumns[columnIndex] = {
+      ...newColumns[columnIndex],
+      items: newColumns[columnIndex].items.map((item) => ({
+        ...item,
+        isSelected: item.name === itemName,
+      })),
+    };
+    const newPath = newColumns
+      .slice(1)
+      .map((col) => col.selected)
+      .concat(itemName)
+      .join(".");
+    updateQueryParam("path", newPath);
+    setPath(newPath);
     setColumns((prevColumns) => {
       const newColumns = prevColumns.slice(0, columnIndex + 1);
       newColumns[columnIndex] = {
@@ -116,7 +146,9 @@ const App = () => {
 
   const handleEndpointChange = (event) => {
     setColumns(getInitialColumns(null));
-    setApiEndpoint(event.target.value);
+    const newEndpoint = event.target.value;
+    setApiEndpoint(newEndpoint);
+    updateQueryParam("endpoint", newEndpoint);
   };
 
   const dataToShow = columns.at(-1).items.length === 0 && dataView;
@@ -137,6 +169,59 @@ const App = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             VStorage Explorer
           </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+            <Typography variant="body1" sx={{ mr: 2 }}>
+              Fetched Height: {currentBlockHeight}
+            </Typography>
+            <IconButton
+              onClick={() => {
+                setBlockHeight((prev) => {
+                  const newValue = Math.max(0, prev - 1);
+                  document.querySelector('input[type="number"]').value = newValue;
+                  return newValue;
+                });
+              }}
+              size="small"
+              color="inherit"
+              aria-label="decrease block height"
+              sx={{ mr: 1 }}
+            >
+              <RemoveIcon />
+            </IconButton>
+            <input
+              type="number"
+              inputMode="numeric"
+              step="any"
+              placeholder="Set Height (Optional)"
+              onChange={(e) => {
+                setBlockHeight(e.target.value);
+              }}
+              style={{
+                width: "150px",
+                padding: "5px",
+                borderRadius: "4px",
+                border: "1px solid #eee", // Lighter border color
+                backgroundColor: "rgba(255, 255, 255, 0.15)",
+                color: "#f0f0f0", // Lighter text color
+                textAlign: "center",
+              }}
+            />
+            <IconButton
+              onClick={() => {
+                setBlockHeight((prev) => {
+                  const newValue = prev + 1;
+                  document.querySelector('input[type="number"]').value = newValue;
+                  return newValue;
+                });
+              }}
+              size="small"
+              color="inherit"
+              aria-label="increase block height"
+              sx={{ ml: 1 }}
+            >
+              <AddIcon />
+            </IconButton>
+          </Box>
           <Select
             sx={{
               bgcolor: "rgba(255, 255, 255, 0.15)", // Semi-transparent white background

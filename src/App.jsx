@@ -20,6 +20,7 @@ import ContentPane from "./ContentPane";
 import MillerColumns from "./MillerColumns";
 
 import "./App.css";
+import { storageHelper } from "@agoric/client-utils";
 
 const updateQueryParam = (key, value) => {
   const params = new URLSearchParams(window.location.search);
@@ -49,7 +50,7 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [path, setPath] = useState(searchParams.get("path"));
   const [columns, setColumns] = useState(getInitialColumns(path));
-  const [dataView, setDataView] = useState("");
+  const [dataView, setDataView] = useState({});
   const [blockHeight, setBlockHeight] = useState(
     searchParams.get("height") || null
   );
@@ -96,16 +97,24 @@ const App = () => {
       })
       .finally(() => setLoading(false));
 
+    const dataPath = columnPaths.at(-1);
+    console.log("fetching data", dataPath);
+
     // Fetch data
-    fetchData(apiEndpoint, columnPaths.at(-1), blockHeight).then((response) => {
+    fetchData(apiEndpoint, dataPath, blockHeight).then((response) => {
       if (response) {
-        console.log("Data received from fetchData:", response.data);
-        setDataView(response.data.value);
+        console.log("Data received from fetchData:", response.data.value);
+        const take2 = storageHelper.unserializeTxt(response.data.value);
+        console.log("DEBUG take2", take2);
+        const obj = JSON.parse(response.data.value);
+        console.log("DEBUG obj", typeof obj, obj);
+        obj.values = obj.values.map((v) => JSON.parse(v));
+        console.log("DEBUG obj.values", obj.values);
+        setDataView(obj);
         setCurrentBlockHeight(response.blockHeight);
         setWalletId(response.walletId);
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiEndpoint, path, blockHeight]);
 
   useEffect(() => {
@@ -296,7 +305,7 @@ const App = () => {
               <ContentCopyIcon />
             </IconButton>
           </Tooltip>
-          <ContentPane content={dataView} />
+          <ContentPane obj={dataView} />
         </Box>
       </SplitPane>
       <Box

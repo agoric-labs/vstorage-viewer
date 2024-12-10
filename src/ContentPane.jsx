@@ -4,23 +4,9 @@ import ReactJson from "react-json-view";
 
 /**
  * @param {object} props
- * @param {string} props.content JSON string
+ * @param {object} props.obj JSON-safe object
  */
-const ContentPane = ({ content }) => {
-  // Attempt to parse the JSON content for display
-  const parseJson = (jsonContent) => {
-    try {
-      return JSON.parse(jsonContent);
-    } catch (e) {
-      console.error("Error parsing JSON:", e);
-      return undefined;
-    }
-  };
-
-  const json = parseJson(content);
-  if (!content) {
-    return null;
-  }
+const ContentPane = ({ obj }) => {
   return (
     <Box
       flex="1"
@@ -32,19 +18,15 @@ const ContentPane = ({ content }) => {
       padding={2}
       style={{ whiteSpace: "pre-wrap" }}
     >
-      {json ? (
-        <ReactJson
-          src={json}
-          theme="rjv-default"
-          indentWidth={2}
-          collapsed={false}
-          enableClipboard={false}
-          displayObjectSize={false}
-          displayDataTypes={false}
-        />
-      ) : (
-        <p></p>
-      )}
+      <ReactJson
+        src={obj}
+        theme="rjv-default"
+        indentWidth={2}
+        collapsed={false}
+        enableClipboard={false}
+        displayObjectSize={false}
+        displayDataTypes={false}
+      />
     </Box>
   );
 };

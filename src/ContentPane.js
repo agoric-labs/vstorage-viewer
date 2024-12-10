@@ -2,12 +2,17 @@ import React from "react";
 import { Box } from "@mui/material";
 import ReactJson from "react-json-view";
 
+/**
+ * @param {object} props
+ * @param {string} props.content JSON string
+ */
 const ContentPane = ({ content }) => {
   // Attempt to parse the JSON content for display
   const parseJson = (jsonContent) => {
     try {
       return JSON.parse(jsonContent);
     } catch (e) {
+      console.error("Error parsing JSON:", e);
       return undefined;
     }
   };

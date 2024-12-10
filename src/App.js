@@ -1,24 +1,23 @@
-import React, { useState, useEffect } from "react";
-import MillerColumns from "./MillerColumns";
-import ContentPane from "./ContentPane";
+import AddIcon from "@mui/icons-material/Add";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import RemoveIcon from "@mui/icons-material/Remove";
 import {
   AppBar,
-  Toolbar,
-  Typography,
   Box,
-  IconButton,
-  Select,
-  MenuItem,
-  Tooltip,
   CircularProgress,
+  IconButton,
+  MenuItem,
+  Select,
+  Toolbar,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { fetchChildren, fetchData } from "./api";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
-import apiEndpoints from "./config";
-import { cleanJSON } from "./utils";
+import React, { useEffect, useState } from "react";
 import SplitPane from "react-split-pane";
+import { fetchChildren, fetchData } from "./api";
+import apiEndpoints from "./config";
+import ContentPane from "./ContentPane";
+import MillerColumns from "./MillerColumns";
 
 import "./App.css";
 
@@ -52,7 +51,7 @@ const App = () => {
   const [columns, setColumns] = useState(getInitialColumns(path));
   const [dataView, setDataView] = useState("");
   const [blockHeight, setBlockHeight] = useState(
-    searchParams.get("height") || null,
+    searchParams.get("height") || null
   );
   const [currentBlockHeight, setCurrentBlockHeight] = useState("");
   const initialEndpoint = searchParams.get("endpoint") || apiEndpoints[0].value;
@@ -66,7 +65,7 @@ const App = () => {
         .slice(0, idx + 1)
         .map((col) => col.selected)
         .filter((x) => x !== undefined)
-        .join("."),
+        .join(".")
     );
 
     // Fetch columns
@@ -79,7 +78,7 @@ const App = () => {
             }
             return [];
           })
-        : null,
+        : null
     );
     Promise.all(columnPromises)
       .then((responses) => {
@@ -92,7 +91,7 @@ const App = () => {
                   isSelected: prevColumns[idx + 1]?.selected === name,
                 }))
               : column.items,
-          })),
+          }))
         );
       })
       .finally(() => setLoading(false));
@@ -101,7 +100,7 @@ const App = () => {
     fetchData(apiEndpoint, columnPaths.at(-1), blockHeight).then((response) => {
       if (response) {
         console.log("Data received from fetchData:", response.data);
-        setDataView(JSON.stringify(cleanJSON(response.data)));
+        setDataView(response.data.value);
         setCurrentBlockHeight(response.blockHeight);
         setWalletId(response.walletId);
       }
@@ -165,8 +164,6 @@ const App = () => {
     setApiEndpoint(newEndpoint);
     updateQueryParam("endpoint", newEndpoint);
   };
-
-  const dataToShow = columns.at(-1).items.length === 0 && dataView;
 
   return (
     <Box
@@ -299,7 +296,7 @@ const App = () => {
               <ContentCopyIcon />
             </IconButton>
           </Tooltip>
-          <ContentPane content={dataToShow} />
+          <ContentPane content={dataView} />
         </Box>
       </SplitPane>
       <Box

@@ -1,22 +1,22 @@
 const defaultPath = "/custom/vstorage/children/";
 
 export const fetchChildren = async (apiEndpoint, path, blockHeight) => {
-  const url = `${apiEndpoint.replace('.api.', '.rpc.')}`;
+  const url = `${apiEndpoint.replace(".api.", ".rpc.")}`;
 
   const requestBody = {
     jsonrpc: "2.0",
     id: 1,
     method: "abci_query",
     params: {
-      path: `${defaultPath}${path ? `${path}` : ''}`,
+      path: `${defaultPath}${path ? `${path}` : ""}`,
       height: blockHeight && blockHeight !== "0" ? blockHeight.toString() : "0",
     },
   };
   try {
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
     });
@@ -35,21 +35,21 @@ export const fetchChildren = async (apiEndpoint, path, blockHeight) => {
 };
 
 export const fetchData = async (apiEndpoint, path, blockHeight) => {
-  const url = `${apiEndpoint.replace('.api.', '.rpc.')}`;
+  const url = `${apiEndpoint.replace(".api.", ".rpc.")}`;
   const requestBody = {
     jsonrpc: "2.0",
     id: 1,
     method: "abci_query",
     params: {
-      path: `${defaultPath.replace('/children/', '/data/')}${path ? `${path}` : ''}`,
+      path: `${defaultPath.replace("/children/", "/data/")}${path ? `${path}` : ""}`,
       height: blockHeight && blockHeight !== "0" ? blockHeight.toString() : "0",
     },
   };
   try {
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
     });
@@ -60,22 +60,27 @@ export const fetchData = async (apiEndpoint, path, blockHeight) => {
     }
     const base64Value = jsonResponse.result.response.value;
     let parsedData = JSON.parse(atob(base64Value));
-    if (typeof parsedData === 'string') {
+    if (typeof parsedData === "string") {
       parsedData = JSON.parse(parsedData);
     }
 
     // Check if the path matches the specified pattern
     let walletId = null;
-    const vaultPattern = /published\.vaultFactory\.managers\.manager[0-9]\.vaults.vault[0-9]+/;
-    if (vaultPattern.test(path) && (apiEndpoint.includes("main-a.rpc.agoric.net") || apiEndpoint.includes("main.rpc.agoric.net"))) {
-      const vaultId = path.split('/').pop(); // Extract the vault ID
+    const vaultPattern =
+      /published\.vaultFactory\.managers\.manager[0-9]\.vaults.vault[0-9]+/;
+    if (
+      vaultPattern.test(path) &&
+      (apiEndpoint.includes("main-a.rpc.agoric.net") ||
+        apiEndpoint.includes("main.rpc.agoric.net"))
+    ) {
+      const vaultId = path.split("/").pop(); // Extract the vault ID
       walletId = await fetchWalletIdByVaultId(vaultId);
-      walletId = walletId ? walletId.split('.').slice(-2, -1)[0] : null;
+      walletId = walletId ? walletId.split(".").slice(-2, -1)[0] : null;
     }
     return {
       data: parsedData,
       blockHeight: jsonResponse.result.response.height,
-      walletId
+      walletId,
     };
   } catch (error) {
     console.error("Fetching data error:", error, "Request body:", requestBody);
@@ -99,13 +104,16 @@ export const fetchWalletIdByVaultId = async (vaultId) => {
   };
 
   try {
-    const response = await fetch("https://api.subquery.network/sq/agoric-labs/agoric-mainnet-v2", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      "https://api.subquery.network/sq/agoric-labs/agoric-mainnet-v2",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(query),
       },
-      body: JSON.stringify(query),
-    });
+    );
 
     if (!response.ok) throw new Error("Network response was not ok");
 

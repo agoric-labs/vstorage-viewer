@@ -25,7 +25,7 @@ const ContentPane = ({ content }) => {
       margin="10px"
       overflow="auto"
       padding={2}
-      style={{ whiteSpace: 'pre-wrap' }}
+      style={{ whiteSpace: "pre-wrap" }}
     >
       {json ? (
         <ReactJson

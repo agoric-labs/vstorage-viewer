@@ -10,16 +10,17 @@ import {
   Select,
   MenuItem,
   Tooltip,
-  CircularProgress } from "@mui/material";
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+  CircularProgress,
+} from "@mui/material";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { fetchChildren, fetchData } from "./api";
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 import apiEndpoints from "./config";
 import { cleanJSON } from "./utils";
-import SplitPane from 'react-split-pane';
+import SplitPane from "react-split-pane";
 
-import './App.css';
+import "./App.css";
 
 const updateQueryParam = (key, value) => {
   const params = new URLSearchParams(window.location.search);
@@ -50,7 +51,9 @@ const App = () => {
   const [path, setPath] = useState(searchParams.get("path"));
   const [columns, setColumns] = useState(getInitialColumns(path));
   const [dataView, setDataView] = useState("");
-  const [blockHeight, setBlockHeight] = useState(searchParams.get("height") || null);
+  const [blockHeight, setBlockHeight] = useState(
+    searchParams.get("height") || null,
+  );
   const [currentBlockHeight, setCurrentBlockHeight] = useState("");
   const initialEndpoint = searchParams.get("endpoint") || apiEndpoints[0].value;
   const [apiEndpoint, setApiEndpoint] = useState(initialEndpoint);
@@ -61,10 +64,11 @@ const App = () => {
     const columnPaths = columns.map((_, idx) =>
       columns
         .slice(0, idx + 1)
-        .map((col) => col.selected).filter((x) => x !== undefined)
-        .join(".")
+        .map((col) => col.selected)
+        .filter((x) => x !== undefined)
+        .join("."),
     );
-    
+
     // Fetch columns
     const columnPromises = columnPaths.map((path, idx) =>
       columns[idx].items.length === 0
@@ -75,21 +79,23 @@ const App = () => {
             }
             return [];
           })
-        : null
+        : null,
     );
-    Promise.all(columnPromises).then((responses) => {
-      setColumns((prevColumns) =>
-        prevColumns.map((column, idx) => ({
-          selected: column.selected,
-          items: responses[idx]
-            ? responses[idx].map((name) => ({
-                name,
-                isSelected: prevColumns[idx + 1]?.selected === name,
-              }))
-            : column.items,
-        }))
-      );
-    }).finally(() => setLoading(false));
+    Promise.all(columnPromises)
+      .then((responses) => {
+        setColumns((prevColumns) =>
+          prevColumns.map((column, idx) => ({
+            selected: column.selected,
+            items: responses[idx]
+              ? responses[idx].map((name) => ({
+                  name,
+                  isSelected: prevColumns[idx + 1]?.selected === name,
+                }))
+              : column.items,
+          })),
+        );
+      })
+      .finally(() => setLoading(false));
 
     // Fetch data
     fetchData(apiEndpoint, columnPaths.at(-1), blockHeight).then((response) => {
@@ -163,13 +169,20 @@ const App = () => {
   const dataToShow = columns.at(-1).items.length === 0 && dataView;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+      }}
+    >
       <AppBar position="static" sx={{ bgcolor: "#BB2D40", zIndex: 1100 }}>
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             VStorage Explorer
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
             <Typography variant="body1" sx={{ mr: 2 }}>
               Height: {currentBlockHeight}
             </Typography>
@@ -177,7 +190,8 @@ const App = () => {
               onClick={() => {
                 setBlockHeight((prev) => {
                   const newValue = Math.max(0, prev - 1);
-                  document.querySelector('input[type="number"]').value = newValue;
+                  document.querySelector('input[type="number"]').value =
+                    newValue;
                   return newValue;
                 });
               }}
@@ -212,7 +226,8 @@ const App = () => {
               onClick={() => {
                 setBlockHeight((prev) => {
                   const newValue = prev + 1;
-                  document.querySelector('input[type="number"]').value = newValue;
+                  document.querySelector('input[type="number"]').value =
+                    newValue;
                   return newValue;
                 });
               }}
@@ -246,34 +261,40 @@ const App = () => {
         </Toolbar>
       </AppBar>
       {loading && (
-          <Box sx={{ 
-            position: 'fixed', 
-            top: 0, 
-            left: 0, 
-            width: '100%', 
-            height: '100%', 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-            zIndex: 1500 
-          }}>
-            <CircularProgress />
-          </Box>
-        )}
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            zIndex: 1500,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      )}
       <SplitPane
         split="horizontal" // or "vertical" based on your layout
         defaultSize="50%"
         minSize={100}
         maxSize={400}
-        style={{ position: 'relative', width: '100%', height: '100%' }}
+        style={{ position: "relative", width: "100%", height: "100%" }}
       >
-        <MillerColumns columns={columns} onItemSelected={handleItemSelected} isLoading={loading}/>
-        <Box sx={{ position: 'relative', paddingBottom: '60px' }}>
+        <MillerColumns
+          columns={columns}
+          onItemSelected={handleItemSelected}
+          isLoading={loading}
+        />
+        <Box sx={{ position: "relative", paddingBottom: "60px" }}>
           <Tooltip title="Copy Data">
             <IconButton
               onClick={() => navigator.clipboard.writeText(dataView)}
-              sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
+              sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}
             >
               <ContentCopyIcon />
             </IconButton>
@@ -283,15 +304,15 @@ const App = () => {
       </SplitPane>
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '2px',
-          backgroundColor: '#ffffff',
-          borderTop: '1px solid #ccc',
-          position: 'fixed',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "2px",
+          backgroundColor: "#ffffff",
+          borderTop: "1px solid #ccc",
+          position: "fixed",
           bottom: 0,
-          width: '100%',
+          width: "100%",
           zIndex: 1100,
         }}
       >
@@ -300,7 +321,7 @@ const App = () => {
           href="https://github.com/agoric-labs/vstorage-viewer"
           target="_blank"
           rel="noopener noreferrer"
-          sx={{ color: 'inherit' }}
+          sx={{ color: "inherit" }}
         >
           <img
             src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
@@ -308,11 +329,11 @@ const App = () => {
             style={{ width: 48, height: 48 }}
           />
         </IconButton>
-        <Typography variant="body2" sx={{ ml: 'auto', mr: 2 }}>
-          {`/custom/vstorage/children/${path ? `${path}` : ''} ${walletId ? `(${walletId})` : ''}`}
+        <Typography variant="body2" sx={{ ml: "auto", mr: 2 }}>
+          {`/custom/vstorage/children/${path ? `${path}` : ""} ${walletId ? `(${walletId})` : ""}`}
         </Typography>
-        </Box>
       </Box>
+    </Box>
   );
 };
 

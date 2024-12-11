@@ -7,26 +7,30 @@ This is a web application designed to explore and visualize VStorage. It provide
 To set up and run the project locally, follow these steps:
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/agoric-labs/vstorage-viewer.git
    cd vstorage-viewer
    ```
 
 2. **Install dependencies:**
+
    ```bash
-   npm install
+   yarn install
    ```
 
 3. **Start the development server:**
+
    ```bash
-   npm start
+   yarn start
    ```
 
    Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 4. **Build for production:**
+
    ```bash
-   npm run build
+   yarn run build
    ```
 
    This will create an optimized production build in the `build` folder.

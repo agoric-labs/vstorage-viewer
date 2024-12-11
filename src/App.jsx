@@ -14,13 +14,15 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import SplitPane from "react-split-pane";
-import { fetchChildren, fetchData } from "./api";
+import { bigIntReplacer, fetchChildren, fetchData } from "./api";
 import apiEndpoints from "./config";
 import ContentPane from "./ContentPane";
 import MillerColumns from "./MillerColumns";
 
 import "./App.css";
-import { storageHelper } from "@agoric/client-utils";
+import { makeFromBoard, storageHelper } from "@agoric/client-utils";
+
+const boardCtx = makeFromBoard();
 
 const updateQueryParam = (key, value) => {
   const params = new URLSearchParams(window.location.search);
@@ -54,7 +56,7 @@ const App = () => {
   const [blockHeight, setBlockHeight] = useState(
     searchParams.get("height") || null
   );
-  const [currentBlockHeight, setCurrentBlockHeight] = useState("");
+  const [currentBlockHeight, setCurrentBlockHeight] = useState(null);
   const initialEndpoint = searchParams.get("endpoint") || apiEndpoints[0].value;
   const [apiEndpoint, setApiEndpoint] = useState(initialEndpoint);
   const [walletId, setWalletId] = useState("");
@@ -98,18 +100,19 @@ const App = () => {
       .finally(() => setLoading(false));
 
     const dataPath = columnPaths.at(-1);
-    console.log("fetching data", dataPath);
 
     // Fetch data
+    // TODO use VstorageKit instead so we don't have to transform JSON back and
     fetchData(apiEndpoint, dataPath, blockHeight).then((response) => {
       if (response) {
-        console.log("Data received from fetchData:", response.data.value);
-        const take2 = storageHelper.unserializeTxt(response.data.value);
-        console.log("DEBUG take2", take2);
+        const unmarshalledValues = storageHelper.unserializeTxt(
+          JSON.stringify({ value: response.data.value }, bigIntReplacer),
+          boardCtx,
+        );
         const obj = JSON.parse(response.data.value);
-        console.log("DEBUG obj", typeof obj, obj);
-        obj.values = obj.values.map((v) => JSON.parse(v));
-        console.log("DEBUG obj.values", obj.values);
+        obj.values = JSON.parse(
+          JSON.stringify(unmarshalledValues, bigIntReplacer),
+        );
         setDataView(obj);
         setCurrentBlockHeight(response.blockHeight);
         setWalletId(response.walletId);
@@ -138,7 +141,7 @@ const App = () => {
     // Return early if the item is already selected
     if (columns[columnIndex]?.selected === itemName) return;
 
-    setDataView("");
+    setDataView({});
     const newColumns = columns.slice(0, columnIndex + 1);
     newColumns[columnIndex] = {
       ...newColumns[columnIndex],
@@ -299,13 +302,22 @@ const App = () => {
         <Box sx={{ position: "relative", paddingBottom: "60px" }}>
           <Tooltip title="Copy Data">
             <IconButton
-              onClick={() => navigator.clipboard.writeText(dataView)}
+              onClick={() =>
+                navigator.clipboard.writeText(
+                  JSON.stringify(dataView, bigIntReplacer),
+                )
+              }
               sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}
             >
               <ContentCopyIcon />
             </IconButton>
           </Tooltip>
-          <ContentPane obj={dataView} />
+          {dataView.blockHeight && (
+            <ContentPane
+              blockHeight={dataView.blockHeight}
+              values={dataView.values}
+            />
+          )}
         </Box>
       </SplitPane>
       <Box

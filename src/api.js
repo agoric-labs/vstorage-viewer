@@ -1,5 +1,8 @@
 const defaultPath = "/custom/vstorage/children/";
 
+export const bigIntReplacer = (_key, val) =>
+  typeof val === "bigint" ? Number(val) : val;
+
 export const fetchChildren = async (apiEndpoint, path, blockHeight) => {
   const url = `${apiEndpoint.replace(".api.", ".rpc.")}`;
 

@@ -4,30 +4,49 @@ import ReactJson from "react-json-view";
 
 /**
  * @param {object} props
- * @param {object} props.obj JSON-safe object
+ * @param {number} props.blockHeight
+ * @param {object[]} props.values
  */
-const ContentPane = ({ obj }) => {
+const ContentPane = ({ blockHeight, values }) => {
   return (
-    <Box
-      flex="1"
-      bgcolor="#ffffff"
-      borderRadius="8px"
-      boxShadow="0 2px 4px rgba(0,0,0,0.5)"
-      margin="10px"
-      overflow="auto"
-      padding={2}
-      style={{ whiteSpace: "pre-wrap" }}
-    >
-      <ReactJson
-        src={obj}
-        theme="rjv-default"
-        indentWidth={2}
-        collapsed={false}
-        enableClipboard={false}
-        displayObjectSize={false}
-        displayDataTypes={false}
-      />
-    </Box>
+    <div>
+      <Box
+        flex="1"
+        bgcolor="#ffffff"
+        borderRadius="8px"
+        boxShadow="0 2px 4px rgba(0,0,0,0.5)"
+        margin="10px"
+        overflow="auto"
+        padding={2}
+        style={{ whiteSpace: "pre-wrap" }}
+      >
+        Block: <tt>{blockHeight}</tt>
+      </Box>
+      {values.map((v, i) => (
+        <Box
+          key={i}
+          flex="1"
+          bgcolor="#ffffff"
+          borderRadius="8px"
+          boxShadow="0 2px 4px rgba(0,0,0,0.5)"
+          margin="10px"
+          overflow="auto"
+          padding={2}
+          style={{ whiteSpace: "pre-wrap" }}
+        >
+          <ReactJson
+            src={v}
+            name={null}
+            theme="rjv-default"
+            indentWidth={2}
+            collapsed={false}
+            enableClipboard={false}
+            displayObjectSize={false}
+            displayDataTypes={false}
+          />
+        </Box>
+      ))}
+    </div>
   );
 };
 

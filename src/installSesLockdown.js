@@ -8,12 +8,12 @@ globalThis.Buffer = Buffer;
 // @ts-expect-error Add process to context for cosmos-kit
 globalThis.process = { env: import.meta.env };
 
-const consoleTaming = import.meta.env.PROD ? "safe" : "unsafe";
-
 lockdown({
   errorTaming: "unsafe",
   overrideTaming: "severe",
-  consoleTaming,
+  consoleTaming: "unsafe",
+  errorTrapping: "none",
+  stackFiltering: "verbose",
 });
 
 Error.stackTraceLimit = Infinity;

@@ -14,15 +14,12 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import SplitPane from "react-split-pane";
-import { bigIntReplacer, fetchChildren, fetchData } from "./api";
+import { bigIntReplacer, fetchChildren, fetchData, decodeData } from "./api";
 import apiEndpoints from "./config";
 import ContentPane from "./ContentPane";
 import MillerColumns from "./MillerColumns";
 
 import "./App.css";
-import { makeFromBoard, storageHelper } from "@agoric/client-utils";
-
-const boardCtx = makeFromBoard();
 
 const updateQueryParam = (key, value) => {
   const params = new URLSearchParams(window.location.search);
@@ -103,21 +100,17 @@ const App = () => {
 
     // Fetch data
     // TODO use VstorageKit instead so we don't have to transform JSON back and
-    fetchData(apiEndpoint, dataPath, blockHeight).then((response) => {
-      if (response) {
-        const unmarshalledValues = storageHelper.unserializeTxt(
-          JSON.stringify({ value: response.data.value }, bigIntReplacer),
-          boardCtx,
-        );
-        const obj = JSON.parse(response.data.value);
-        obj.values = JSON.parse(
-          JSON.stringify(unmarshalledValues, bigIntReplacer),
-        );
-        setDataView(obj);
-        setCurrentBlockHeight(response.blockHeight);
-        setWalletId(response.walletId);
-      }
-    });
+    fetchData(apiEndpoint, dataPath, blockHeight)
+      .then((response) => {
+        if (response) {
+          assert("data" in response, `no data in response ${response}`);
+          const obj = decodeData(response);
+          setDataView(obj);
+          setCurrentBlockHeight(response.blockHeight);
+          setWalletId(response.walletId);
+        }
+      })
+      .catch((e) => console.error("fetchData failed parsing response", e));
   }, [apiEndpoint, path, blockHeight]);
 
   useEffect(() => {

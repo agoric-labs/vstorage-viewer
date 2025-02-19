@@ -1,4 +1,8 @@
+import { makeFromBoard, storageHelper } from "@agoric/client-utils";
+
 const defaultPath = "/custom/vstorage/children/";
+
+const boardCtx = makeFromBoard();
 
 export const bigIntReplacer = (_key, val) =>
   typeof val === "bigint" ? Number(val) : val;
@@ -18,9 +22,7 @@ export const fetchChildren = async (apiEndpoint, path, blockHeight) => {
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
     if (!response.ok) throw new Error("Network response was not ok");
@@ -51,9 +53,7 @@ export const fetchData = async (apiEndpoint, path, blockHeight) => {
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
     if (!response.ok) throw new Error("Network response was not ok");
@@ -90,6 +90,31 @@ export const fetchData = async (apiEndpoint, path, blockHeight) => {
     return "Failed to fetch data";
   }
 };
+
+// XXX all this unmarshalling should be abstracted by client-utils
+/**
+ * Normalize response from fetchData
+ *
+ * @param {object} response - Response object from fetchData
+ * @param {object} response.data - Data from fetchData
+ * @param {number} response.blockHeight - Block height from fetchData
+ * @returns {object} Normalized response
+ */
+export const decodeData = (response) => {
+  const obj = JSON.parse(response.data.value);
+  try {
+    const unmarshalledValues = storageHelper.unserializeTxt(
+      JSON.stringify({ value: response.data.value }, bigIntReplacer),
+      boardCtx,
+    );
+    obj.values = JSON.parse(JSON.stringify(unmarshalledValues, bigIntReplacer));
+  } catch (e) {
+    // It's not CapData, fall back to plain JSON
+    obj.values = obj.values.map(JSON.parse);
+  }
+  return obj;
+};
+
 export const fetchWalletIdByVaultId = async (vaultId) => {
   const query = {
     query: `
@@ -111,9 +136,7 @@ export const fetchWalletIdByVaultId = async (vaultId) => {
       "https://api.subquery.network/sq/agoric-labs/agoric-mainnet-v2",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(query),
       },
     );

@@ -22,7 +22,7 @@ To set up and run the project locally, follow these steps:
 3. **Start the development server:**
 
    ```bash
-   yarn start
+   yarn dev
    ```
 
    Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
@@ -30,7 +30,7 @@ To set up and run the project locally, follow these steps:
 4. **Build for production:**
 
    ```bash
-   yarn run build
+   yarn build
    ```
 
    This will create an optimized production build in the `build` folder.

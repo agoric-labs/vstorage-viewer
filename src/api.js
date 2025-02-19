@@ -18,9 +18,7 @@ export const fetchChildren = async (apiEndpoint, path, blockHeight) => {
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
     if (!response.ok) throw new Error("Network response was not ok");
@@ -51,9 +49,7 @@ export const fetchData = async (apiEndpoint, path, blockHeight) => {
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
     if (!response.ok) throw new Error("Network response was not ok");
@@ -111,9 +107,7 @@ export const fetchWalletIdByVaultId = async (vaultId) => {
       "https://api.subquery.network/sq/agoric-labs/agoric-mainnet-v2",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(query),
       },
     );

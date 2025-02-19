@@ -54,7 +54,7 @@ const App = () => {
   const [columns, setColumns] = useState(getInitialColumns(path));
   const [dataView, setDataView] = useState({});
   const [blockHeight, setBlockHeight] = useState(
-    searchParams.get("height") || null
+    searchParams.get("height") || null,
   );
   const [currentBlockHeight, setCurrentBlockHeight] = useState(null);
   const initialEndpoint = searchParams.get("endpoint") || apiEndpoints[0].value;
@@ -68,7 +68,7 @@ const App = () => {
         .slice(0, idx + 1)
         .map((col) => col.selected)
         .filter((x) => x !== undefined)
-        .join(".")
+        .join("."),
     );
 
     // Fetch columns
@@ -81,7 +81,7 @@ const App = () => {
             }
             return [];
           })
-        : null
+        : null,
     );
     Promise.all(columnPromises)
       .then((responses) => {
@@ -94,7 +94,7 @@ const App = () => {
                   isSelected: prevColumns[idx + 1]?.selected === name,
                 }))
               : column.items,
-          }))
+          })),
         );
       })
       .finally(() => setLoading(false));

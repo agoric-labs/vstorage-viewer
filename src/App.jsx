@@ -104,8 +104,7 @@ const App = () => {
       .then((response) => {
         if (response) {
           assert("data" in response, `no data in response ${response}`);
-          const obj = decodeData(response);
-          setDataView(obj);
+          setDataView(response.data);
           setCurrentBlockHeight(response.blockHeight);
           setWalletId(response.walletId);
         }
@@ -297,7 +296,7 @@ const App = () => {
             <IconButton
               onClick={() =>
                 navigator.clipboard.writeText(
-                  JSON.stringify(dataView, bigIntReplacer),
+                  JSON.stringify(decodeData(dataView), bigIntReplacer),
                 )
               }
               sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}
@@ -305,11 +304,8 @@ const App = () => {
               <ContentCopyIcon />
             </IconButton>
           </Tooltip>
-          {dataView.blockHeight && (
-            <ContentPane
-              blockHeight={dataView.blockHeight}
-              values={dataView.values}
-            />
+          {currentBlockHeight && dataView && (
+            <ContentPane blockHeight={currentBlockHeight} data={dataView} />
           )}
         </Box>
       </SplitPane>

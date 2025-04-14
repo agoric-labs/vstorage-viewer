@@ -95,16 +95,15 @@ export const fetchData = async (apiEndpoint, path, blockHeight) => {
 /**
  * Normalize response from fetchData
  *
- * @param {object} response - Response object from fetchData
- * @param {object} response.data - Data from fetchData
- * @param {number} response.blockHeight - Block height from fetchData
+ * @param {object} data - Data from fetchData
+ * @param {object} data.value - Value from data of fetchData
  * @returns {object} Normalized response
  */
-export const decodeData = (response) => {
-  const obj = JSON.parse(response.data.value);
+export const decodeData = ({ value }) => {
+  const obj = JSON.parse(value);
   try {
     const unmarshalledValues = storageHelper.unserializeTxt(
-      JSON.stringify({ value: response.data.value }, bigIntReplacer),
+      JSON.stringify({ value }, bigIntReplacer),
       boardCtx,
     );
     obj.values = JSON.parse(JSON.stringify(unmarshalledValues, bigIntReplacer));

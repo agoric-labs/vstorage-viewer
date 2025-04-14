@@ -1,13 +1,15 @@
 import React from "react";
 import { Box } from "@mui/material";
 import ReactJson from "react-json-view";
+import { decodeData } from "./api.js";
 
 /**
  * @param {object} props
  * @param {number} props.blockHeight
- * @param {object[]} props.values
+ * @param {object} props.data
  */
-const ContentPane = ({ blockHeight, values }) => {
+const ContentPane = ({ blockHeight, data }) => {
+  const values = "value" in data ? decodeData(data).values : [];
   return (
     <div>
       <Box

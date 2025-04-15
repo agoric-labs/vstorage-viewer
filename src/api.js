@@ -95,24 +95,21 @@ export const fetchData = async (apiEndpoint, path, blockHeight) => {
 /**
  * Normalize response from fetchData
  *
- * @param {object} response - Response object from fetchData
- * @param {object} response.data - Data from fetchData
- * @param {number} response.blockHeight - Block height from fetchData
- * @returns {object} Normalized response
+ * @param {string[]} values
+ * @returns {object} Pretty response
  */
-export const decodeData = (response) => {
-  const obj = JSON.parse(response.data.value);
+export const decodeValues = (values) => {
   try {
+    // XXX unserializeTxt expects vstorage responses, not just any CapData
     const unmarshalledValues = storageHelper.unserializeTxt(
-      JSON.stringify({ value: response.data.value }, bigIntReplacer),
-      boardCtx,
+      JSON.stringify({ value: JSON.stringify({ values }) }, bigIntReplacer),
+      boardCtx
     );
-    obj.values = JSON.parse(JSON.stringify(unmarshalledValues, bigIntReplacer));
+    return JSON.parse(JSON.stringify(unmarshalledValues, bigIntReplacer));
   } catch (e) {
     // It's not CapData, fall back to plain JSON
-    obj.values = obj.values.map(JSON.parse);
+    return values.map(JSON.parse);
   }
-  return obj;
 };
 
 export const fetchWalletIdByVaultId = async (vaultId) => {
@@ -138,7 +135,7 @@ export const fetchWalletIdByVaultId = async (vaultId) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(query),
-      },
+      }
     );
 
     if (!response.ok) throw new Error("Network response was not ok");

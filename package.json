@@ -11,7 +11,7 @@
     "deploy": "gh-pages -d build"
   },
   "dependencies": {
-    "@agoric/client-utils": "0.2.0-u18a.0",
+    "@agoric/client-utils": "dev",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.19",
@@ -24,8 +24,8 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
     "gh-pages": "^6.3.0",
-    "prettier": "^3.5.1",
-    "vite": "^6.1.1"
+    "prettier": "^3.5.3",
+    "vite": "^6.2.6"
   },
   "browserslist": {
     "production": [
@@ -39,5 +39,5 @@
       "last 1 safari version"
     ]
   },
-  "packageManager": "yarn@4.5.3"
+  "packageManager": "yarn@4.9.1"
 }

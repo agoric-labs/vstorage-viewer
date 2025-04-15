@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import SplitPane from "react-split-pane";
-import { bigIntReplacer, fetchChildren, fetchData, decodeData } from "./api";
+import { bigIntReplacer, fetchChildren, fetchData, decodeValues } from "./api";
 import apiEndpoints from "./config";
 import ContentPane from "./ContentPane";
 import MillerColumns from "./MillerColumns";
@@ -49,7 +49,7 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [path, setPath] = useState(searchParams.get("path"));
   const [columns, setColumns] = useState(getInitialColumns(path));
-  const [dataView, setDataView] = useState({});
+  const [dataValue, setDataValue] = useState({});
   const [blockHeight, setBlockHeight] = useState(
     searchParams.get("height") || null,
   );
@@ -104,7 +104,9 @@ const App = () => {
       .then((response) => {
         if (response) {
           assert("data" in response, `no data in response ${response}`);
-          setDataView(response.data);
+          const dataValue = JSON.parse(response.data.value);
+          console.debug("fetchData", dataValue);
+          setDataValue(dataValue);
           setCurrentBlockHeight(response.blockHeight);
           setWalletId(response.walletId);
         }
@@ -133,7 +135,7 @@ const App = () => {
     // Return early if the item is already selected
     if (columns[columnIndex]?.selected === itemName) return;
 
-    setDataView({});
+    setDataValue({});
     const newColumns = columns.slice(0, columnIndex + 1);
     newColumns[columnIndex] = {
       ...newColumns[columnIndex],
@@ -296,7 +298,10 @@ const App = () => {
             <IconButton
               onClick={() =>
                 navigator.clipboard.writeText(
-                  JSON.stringify(decodeData(dataView), bigIntReplacer),
+                  JSON.stringify(
+                    decodeValues(dataValue.values),
+                    bigIntReplacer,
+                  ),
                 )
               }
               sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}
@@ -304,9 +309,7 @@ const App = () => {
               <ContentCopyIcon />
             </IconButton>
           </Tooltip>
-          {currentBlockHeight && dataView && (
-            <ContentPane blockHeight={currentBlockHeight} data={dataView} />
-          )}
+          {dataValue && <ContentPane {...dataValue} />}
         </Box>
       </SplitPane>
       <Box

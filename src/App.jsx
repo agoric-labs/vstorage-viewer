@@ -14,10 +14,11 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import SplitPane from 'react-split-pane';
-import { bigIntReplacer, fetchChildren, fetchData, decodeValues } from './api';
+import { bigIntReplacer, decodeValues } from './api.js';
 import apiEndpoints from './config';
 import ContentPane from './ContentPane';
 import MillerColumns from './MillerColumns';
+import { makeVstorageKit } from '@agoric/client-utils';
 
 import './App.css';
 
@@ -51,11 +52,19 @@ const App = () => {
   const [columns, setColumns] = useState(getInitialColumns(path));
   const [dataValue, setDataValue] = useState({});
   const [blockHeight, setBlockHeight] = useState(
-    searchParams.get('height') || null,
+    Number(searchParams.get('height')) || undefined,
   );
-  const [currentBlockHeight, setCurrentBlockHeight] = useState(null);
+  const [currentBlockHeight, setCurrentBlockHeight] = useState(
+    /** @type {number | null} */ (null),
+  );
   const initialEndpoint = searchParams.get('endpoint') || apiEndpoints[0].value;
   const [apiEndpoint, setApiEndpoint] = useState(initialEndpoint);
+
+  const vstorageKit = makeVstorageKit(
+    { fetch },
+    { chainName: 'agoric', rpcAddrs: [apiEndpoint] },
+  );
+  const { vstorage } = vstorageKit;
 
   useEffect(() => {
     setLoading(true);
@@ -70,13 +79,9 @@ const App = () => {
     // Fetch columns
     const columnPromises = columnPaths.map((path, idx) =>
       columns[idx].items.length === 0
-        ? fetchChildren(apiEndpoint, path, blockHeight).then((response) => {
-            if (response) {
-              setCurrentBlockHeight(response.blockHeight);
-              return response.children;
-            }
-            return [];
-          })
+        ? vstorage
+            .readStorage(path, { kind: 'children', height: blockHeight })
+            .then((response) => response?.children ?? [])
         : null,
     );
     Promise.all(columnPromises)
@@ -99,17 +104,17 @@ const App = () => {
 
     // Fetch data
     // TODO use VstorageKit instead so we don't have to transform JSON back and
-    fetchData(apiEndpoint, dataPath, blockHeight)
+    vstorage
+      .readStorage(dataPath, { kind: 'data', height: blockHeight })
       .then((response) => {
-        if (response) {
-          assert('data' in response, `no data in response ${response}`);
-          const dataValue = JSON.parse(response.data.value);
-          console.debug('fetchData', dataValue);
-          setDataValue(dataValue);
-          setCurrentBlockHeight(response.blockHeight);
+        if (response.value) {
+          /** @type {import('@agoric/internal/src/lib-chainStorage.js').StreamCell} */
+          const cell = JSON.parse(response.value);
+          setDataValue(cell);
+          setCurrentBlockHeight(Number(cell.blockHeight));
         }
       })
-      .catch((e) => console.error('fetchData failed parsing response', e));
+      .catch((e) => console.error('readStorage failed parsing response', e));
   }, [apiEndpoint, path, blockHeight]);
 
   useEffect(() => {

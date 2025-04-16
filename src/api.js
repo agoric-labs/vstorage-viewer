@@ -67,23 +67,9 @@ export const fetchData = async (apiEndpoint, path, blockHeight) => {
       parsedData = JSON.parse(parsedData);
     }
 
-    // Check if the path matches the specified pattern
-    let walletId = null;
-    const vaultPattern =
-      /published\.vaultFactory\.managers\.manager[0-9]\.vaults.vault[0-9]+/;
-    if (
-      vaultPattern.test(path) &&
-      (apiEndpoint.includes('main-a.rpc.agoric.net') ||
-        apiEndpoint.includes('main.rpc.agoric.net'))
-    ) {
-      const vaultId = path.split('/').pop(); // Extract the vault ID
-      walletId = await fetchWalletIdByVaultId(vaultId);
-      walletId = walletId ? walletId.split('.').slice(-2, -1)[0] : null;
-    }
     return {
       data: parsedData,
       blockHeight: jsonResponse.result.response.height,
-      walletId,
     };
   } catch (error) {
     console.error('Fetching data error:', error, 'Request body:', requestBody);
@@ -109,46 +95,5 @@ export const decodeValues = (values) => {
   } catch (e) {
     // It's not CapData, fall back to plain JSON
     return values.map(JSON.parse);
-  }
-};
-
-export const fetchWalletIdByVaultId = async (vaultId) => {
-  const query = {
-    query: `
-      {
-        vaults(
-          filter: {id: {equalTo: "${vaultId}"}}
-        ) {
-          nodes {
-            id
-            walletId
-          }
-        }
-      }
-    `,
-  };
-
-  try {
-    const response = await fetch(
-      'https://api.subquery.network/sq/agoric-labs/agoric-mainnet-v2',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(query),
-      },
-    );
-
-    if (!response.ok) throw new Error('Network response was not ok');
-
-    const jsonResponse = await response.json();
-    const nodes = jsonResponse.data.vaults.nodes;
-    if (nodes.length > 0) {
-      return nodes[0].walletId;
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.error('Fetching wallet ID error:', error);
-    return null;
   }
 };

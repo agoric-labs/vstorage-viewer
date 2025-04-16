@@ -56,7 +56,6 @@ const App = () => {
   const [currentBlockHeight, setCurrentBlockHeight] = useState(null);
   const initialEndpoint = searchParams.get('endpoint') || apiEndpoints[0].value;
   const [apiEndpoint, setApiEndpoint] = useState(initialEndpoint);
-  const [walletId, setWalletId] = useState('');
 
   useEffect(() => {
     setLoading(true);
@@ -108,7 +107,6 @@ const App = () => {
           console.debug('fetchData', dataValue);
           setDataValue(dataValue);
           setCurrentBlockHeight(response.blockHeight);
-          setWalletId(response.walletId);
         }
       })
       .catch((e) => console.error('fetchData failed parsing response', e));
@@ -339,9 +337,6 @@ const App = () => {
             style={{ width: 48, height: 48 }}
           />
         </IconButton>
-        <Typography variant="body2" sx={{ ml: 'auto', mr: 2 }}>
-          {`/custom/vstorage/children/${path ? `${path}` : ''} ${walletId ? `(${walletId})` : ''}`}
-        </Typography>
       </Box>
     </Box>
   );

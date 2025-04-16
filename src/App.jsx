@@ -14,13 +14,16 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import SplitPane from 'react-split-pane';
-import { bigIntReplacer, decodeValues } from './api.js';
 import apiEndpoints from './config';
 import ContentPane from './ContentPane';
 import MillerColumns from './MillerColumns';
 import { makeVstorageKit } from '@agoric/client-utils';
 
 import './App.css';
+
+/**
+ * @import {StreamCell} from '@agoric/casting';
+ */
 
 const updateQueryParam = (key, value) => {
   const params = new URLSearchParams(window.location.search);
@@ -50,7 +53,9 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [path, setPath] = useState(searchParams.get('path'));
   const [columns, setColumns] = useState(getInitialColumns(path));
-  const [dataValue, setDataValue] = useState({});
+  const [dataValue, setDataValue] = useState(
+    /** @type {StreamCell<string>} */ ({}),
+  );
   const [blockHeight, setBlockHeight] = useState(
     Number(searchParams.get('height')) || undefined,
   );
@@ -299,14 +304,7 @@ const App = () => {
         <Box sx={{ position: 'relative', paddingBottom: '60px' }}>
           <Tooltip title="Copy Data">
             <IconButton
-              onClick={() =>
-                navigator.clipboard.writeText(
-                  JSON.stringify(
-                    decodeValues(dataValue.values),
-                    bigIntReplacer,
-                  ),
-                )
-              }
+              onClick={() => navigator.clipboard.writeText(dataValue.values)}
               sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
             >
               <ContentCopyIcon />

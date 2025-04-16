@@ -1,7 +1,7 @@
 /* global lockdown */
-import "ses";
-import "@endo/eventual-send/shim.js";
-import { Buffer } from "buffer";
+import 'ses';
+import '@endo/eventual-send/shim.js';
+import { Buffer } from 'buffer';
 
 globalThis.Buffer = Buffer;
 
@@ -9,11 +9,11 @@ globalThis.Buffer = Buffer;
 globalThis.process = { env: import.meta.env };
 
 lockdown({
-  errorTaming: "unsafe",
-  overrideTaming: "severe",
-  consoleTaming: "unsafe",
-  errorTrapping: "none",
-  stackFiltering: "verbose",
+  errorTaming: 'unsafe',
+  overrideTaming: 'severe',
+  consoleTaming: 'unsafe',
+  errorTrapping: 'none',
+  stackFiltering: 'verbose',
 });
 
 Error.stackTraceLimit = Infinity;

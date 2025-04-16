@@ -1,31 +1,31 @@
-import { makeFromBoard, storageHelper } from "@agoric/client-utils";
+import { makeFromBoard, storageHelper } from '@agoric/client-utils';
 
-const defaultPath = "/custom/vstorage/children/";
+const defaultPath = '/custom/vstorage/children/';
 
 const boardCtx = makeFromBoard();
 
 export const bigIntReplacer = (_key, val) =>
-  typeof val === "bigint" ? Number(val) : val;
+  typeof val === 'bigint' ? Number(val) : val;
 
 export const fetchChildren = async (apiEndpoint, path, blockHeight) => {
-  const url = `${apiEndpoint.replace(".api.", ".rpc.")}`;
+  const url = `${apiEndpoint.replace('.api.', '.rpc.')}`;
 
   const requestBody = {
-    jsonrpc: "2.0",
+    jsonrpc: '2.0',
     id: 1,
-    method: "abci_query",
+    method: 'abci_query',
     params: {
-      path: `${defaultPath}${path ? `${path}` : ""}`,
-      height: blockHeight && blockHeight !== "0" ? blockHeight.toString() : "0",
+      path: `${defaultPath}${path ? `${path}` : ''}`,
+      height: blockHeight && blockHeight !== '0' ? blockHeight.toString() : '0',
     },
   };
   try {
     const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),
     });
-    if (!response.ok) throw new Error("Network response was not ok");
+    if (!response.ok) throw new Error('Network response was not ok');
     const jsonResponse = await response.json();
     const base64Value = jsonResponse.result.response.value;
     const decodedValue = JSON.parse(atob(base64Value));
@@ -34,36 +34,36 @@ export const fetchChildren = async (apiEndpoint, path, blockHeight) => {
       blockHeight: jsonResponse.result.response.height,
     };
   } catch (error) {
-    console.error("Fetching error:", error);
+    console.error('Fetching error:', error);
     return [];
   }
 };
 
 export const fetchData = async (apiEndpoint, path, blockHeight) => {
-  const url = `${apiEndpoint.replace(".api.", ".rpc.")}`;
+  const url = `${apiEndpoint.replace('.api.', '.rpc.')}`;
   const requestBody = {
-    jsonrpc: "2.0",
+    jsonrpc: '2.0',
     id: 1,
-    method: "abci_query",
+    method: 'abci_query',
     params: {
-      path: `${defaultPath.replace("/children/", "/data/")}${path ? `${path}` : ""}`,
-      height: blockHeight && blockHeight !== "0" ? blockHeight.toString() : "0",
+      path: `${defaultPath.replace('/children/', '/data/')}${path ? `${path}` : ''}`,
+      height: blockHeight && blockHeight !== '0' ? blockHeight.toString() : '0',
     },
   };
   try {
     const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),
     });
-    if (!response.ok) throw new Error("Network response was not ok");
+    if (!response.ok) throw new Error('Network response was not ok');
     const jsonResponse = await response.json();
     if (jsonResponse.result.response.code !== 0) {
       return null;
     }
     const base64Value = jsonResponse.result.response.value;
     let parsedData = JSON.parse(atob(base64Value));
-    if (typeof parsedData === "string") {
+    if (typeof parsedData === 'string') {
       parsedData = JSON.parse(parsedData);
     }
 
@@ -73,12 +73,12 @@ export const fetchData = async (apiEndpoint, path, blockHeight) => {
       /published\.vaultFactory\.managers\.manager[0-9]\.vaults.vault[0-9]+/;
     if (
       vaultPattern.test(path) &&
-      (apiEndpoint.includes("main-a.rpc.agoric.net") ||
-        apiEndpoint.includes("main.rpc.agoric.net"))
+      (apiEndpoint.includes('main-a.rpc.agoric.net') ||
+        apiEndpoint.includes('main.rpc.agoric.net'))
     ) {
-      const vaultId = path.split("/").pop(); // Extract the vault ID
+      const vaultId = path.split('/').pop(); // Extract the vault ID
       walletId = await fetchWalletIdByVaultId(vaultId);
-      walletId = walletId ? walletId.split(".").slice(-2, -1)[0] : null;
+      walletId = walletId ? walletId.split('.').slice(-2, -1)[0] : null;
     }
     return {
       data: parsedData,
@@ -86,8 +86,8 @@ export const fetchData = async (apiEndpoint, path, blockHeight) => {
       walletId,
     };
   } catch (error) {
-    console.error("Fetching data error:", error, "Request body:", requestBody);
-    return "Failed to fetch data";
+    console.error('Fetching data error:', error, 'Request body:', requestBody);
+    return 'Failed to fetch data';
   }
 };
 
@@ -103,7 +103,7 @@ export const decodeValues = (values) => {
     // XXX unserializeTxt expects vstorage responses, not just any CapData
     const unmarshalledValues = storageHelper.unserializeTxt(
       JSON.stringify({ value: JSON.stringify({ values }) }, bigIntReplacer),
-      boardCtx
+      boardCtx,
     );
     return JSON.parse(JSON.stringify(unmarshalledValues, bigIntReplacer));
   } catch (e) {
@@ -130,15 +130,15 @@ export const fetchWalletIdByVaultId = async (vaultId) => {
 
   try {
     const response = await fetch(
-      "https://api.subquery.network/sq/agoric-labs/agoric-mainnet-v2",
+      'https://api.subquery.network/sq/agoric-labs/agoric-mainnet-v2',
       {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(query),
-      }
+      },
     );
 
-    if (!response.ok) throw new Error("Network response was not ok");
+    if (!response.ok) throw new Error('Network response was not ok');
 
     const jsonResponse = await response.json();
     const nodes = jsonResponse.data.vaults.nodes;
@@ -148,7 +148,7 @@ export const fetchWalletIdByVaultId = async (vaultId) => {
       return null;
     }
   } catch (error) {
-    console.error("Fetching wallet ID error:", error);
+    console.error('Fetching wallet ID error:', error);
     return null;
   }
 };

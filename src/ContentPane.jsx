@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Box, Switch, FormControlLabel } from "@mui/material";
-import ReactJson from "react-json-view";
-import { decodeValues } from "./api.js";
+import React, { useState } from 'react';
+import { Box, Switch, FormControlLabel } from '@mui/material';
+import ReactJson from 'react-json-view';
+import { decodeValues } from './api.js';
 
 /**
  * @param {object} props
@@ -9,7 +9,7 @@ import { decodeValues } from "./api.js";
  * @param {string[]} props.values
  */
 const ContentPane = ({ blockHeight, values }) => {
-  console.debug("ContentPane", { blockHeight, values });
+  console.debug('ContentPane', { blockHeight, values });
   const [showRaw, setShowRaw] = useState(false);
 
   const handleToggleChange = (event) => {
@@ -36,9 +36,9 @@ const ContentPane = ({ blockHeight, values }) => {
         margin="10px"
         overflow="auto"
         padding={2}
-        style={{ whiteSpace: "pre-wrap" }}
+        style={{ whiteSpace: 'pre-wrap' }}
       >
-        Block: <tt>{blockHeight || "Latest"}</tt>
+        Block: <tt>{blockHeight || 'Latest'}</tt>
       </Box>
 
       {/* Toggle Switch */}
@@ -60,7 +60,7 @@ const ContentPane = ({ blockHeight, values }) => {
           margin="10px"
           overflow="auto"
           padding={2}
-          style={{ whiteSpace: "pre-wrap" }}
+          style={{ whiteSpace: 'pre-wrap' }}
         >
           <ReactJson
             src={rawValues}
@@ -85,7 +85,7 @@ const ContentPane = ({ blockHeight, values }) => {
             margin="10px"
             overflow="auto"
             padding={2}
-            style={{ whiteSpace: "pre-wrap" }}
+            style={{ whiteSpace: 'pre-wrap' }}
           >
             <ReactJson
               src={v}

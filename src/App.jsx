@@ -1,6 +1,6 @@
-import AddIcon from "@mui/icons-material/Add";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from '@mui/icons-material/Add';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import RemoveIcon from '@mui/icons-material/Remove';
 import {
   AppBar,
   Box,
@@ -11,15 +11,19 @@ import {
   Toolbar,
   Tooltip,
   Typography,
-} from "@mui/material";
-import React, { useEffect, useState } from "react";
-import SplitPane from "react-split-pane";
-import { bigIntReplacer, fetchChildren, fetchData, decodeValues } from "./api";
-import apiEndpoints from "./config";
-import ContentPane from "./ContentPane";
-import MillerColumns from "./MillerColumns";
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import SplitPane from 'react-split-pane';
+import apiEndpoints from './config';
+import ContentPane from './ContentPane';
+import MillerColumns from './MillerColumns';
+import { makeVstorageKit } from '@agoric/client-utils';
 
-import "./App.css";
+import './App.css';
+
+/**
+ * @import {StreamCell} from '@agoric/casting';
+ */
 
 const updateQueryParam = (key, value) => {
   const params = new URLSearchParams(window.location.search);
@@ -27,14 +31,14 @@ const updateQueryParam = (key, value) => {
   const newUrl = `${window.location.protocol}//${window.location.host}${
     window.location.pathname
   }?${params.toString()}`;
-  window.history.pushState({ path: newUrl }, "", newUrl);
+  window.history.pushState({ path: newUrl }, '', newUrl);
 };
 
 const getInitialColumns = (path) => {
   const defaultColumn = { items: [] };
   if (!path) return [defaultColumn];
 
-  const pathElements = path.split(".");
+  const pathElements = path.split('.');
   const columns = pathElements.map((element) => ({
     items: [],
     selected: element,
@@ -47,16 +51,25 @@ const App = () => {
   const searchParams = new URLSearchParams(window.location.search);
 
   const [loading, setLoading] = useState(false);
-  const [path, setPath] = useState(searchParams.get("path"));
+  const [path, setPath] = useState(searchParams.get('path'));
   const [columns, setColumns] = useState(getInitialColumns(path));
-  const [dataValue, setDataValue] = useState({});
-  const [blockHeight, setBlockHeight] = useState(
-    searchParams.get("height") || null,
+  const [dataValue, setDataValue] = useState(
+    /** @type {StreamCell<string>} */ ({}),
   );
-  const [currentBlockHeight, setCurrentBlockHeight] = useState(null);
-  const initialEndpoint = searchParams.get("endpoint") || apiEndpoints[0].value;
+  const [blockHeight, setBlockHeight] = useState(
+    Number(searchParams.get('height')) || undefined,
+  );
+  const [currentBlockHeight, setCurrentBlockHeight] = useState(
+    /** @type {number | null} */ (null),
+  );
+  const initialEndpoint = searchParams.get('endpoint') || apiEndpoints[0].value;
   const [apiEndpoint, setApiEndpoint] = useState(initialEndpoint);
-  const [walletId, setWalletId] = useState("");
+
+  const vstorageKit = makeVstorageKit(
+    { fetch },
+    { chainName: 'agoric', rpcAddrs: [apiEndpoint] },
+  );
+  const { vstorage } = vstorageKit;
 
   useEffect(() => {
     setLoading(true);
@@ -65,19 +78,15 @@ const App = () => {
         .slice(0, idx + 1)
         .map((col) => col.selected)
         .filter((x) => x !== undefined)
-        .join("."),
+        .join('.'),
     );
 
     // Fetch columns
     const columnPromises = columnPaths.map((path, idx) =>
       columns[idx].items.length === 0
-        ? fetchChildren(apiEndpoint, path, blockHeight).then((response) => {
-            if (response) {
-              setCurrentBlockHeight(response.blockHeight);
-              return response.children;
-            }
-            return [];
-          })
+        ? vstorage
+            .readStorage(path, { kind: 'children', height: blockHeight })
+            .then((response) => response?.children ?? [])
         : null,
     );
     Promise.all(columnPromises)
@@ -100,35 +109,34 @@ const App = () => {
 
     // Fetch data
     // TODO use VstorageKit instead so we don't have to transform JSON back and
-    fetchData(apiEndpoint, dataPath, blockHeight)
+    vstorage
+      .readStorage(dataPath, { kind: 'data', height: blockHeight })
       .then((response) => {
-        if (response) {
-          assert("data" in response, `no data in response ${response}`);
-          const dataValue = JSON.parse(response.data.value);
-          console.debug("fetchData", dataValue);
-          setDataValue(dataValue);
-          setCurrentBlockHeight(response.blockHeight);
-          setWalletId(response.walletId);
+        if (response.value) {
+          /** @type {import('@agoric/internal/src/lib-chainStorage.js').StreamCell} */
+          const cell = JSON.parse(response.value);
+          setDataValue(cell);
+          setCurrentBlockHeight(Number(cell.blockHeight));
         }
       })
-      .catch((e) => console.error("fetchData failed parsing response", e));
+      .catch((e) => console.error('readStorage failed parsing response', e));
   }, [apiEndpoint, path, blockHeight]);
 
   useEffect(() => {
     const pathString = columns
       .slice(1)
       .map((col) => col.selected)
-      .join(".");
-    updateQueryParam("path", pathString);
+      .join('.');
+    updateQueryParam('path', pathString);
     setPath(pathString);
   }, [columns]);
 
   useEffect(() => {
-    updateQueryParam("endpoint", apiEndpoint);
+    updateQueryParam('endpoint', apiEndpoint);
   }, [apiEndpoint]);
 
   useEffect(() => {
-    updateQueryParam("height", blockHeight);
+    updateQueryParam('height', blockHeight);
   }, [blockHeight]);
 
   const handleItemSelected = async (itemName, columnIndex) => {
@@ -148,8 +156,8 @@ const App = () => {
       .slice(1)
       .map((col) => col.selected)
       .concat(itemName)
-      .join(".");
-    updateQueryParam("path", newPath);
+      .join('.');
+    updateQueryParam('path', newPath);
     setPath(newPath);
     setColumns((prevColumns) => {
       const newColumns = prevColumns.slice(0, columnIndex + 1);
@@ -168,24 +176,24 @@ const App = () => {
     setColumns(getInitialColumns(null));
     const newEndpoint = event.target.value;
     setApiEndpoint(newEndpoint);
-    updateQueryParam("endpoint", newEndpoint);
+    updateQueryParam('endpoint', newEndpoint);
   };
 
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        width: "100%",
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        width: '100%',
       }}
     >
-      <AppBar position="static" sx={{ bgcolor: "#BB2D40", zIndex: 1100 }}>
+      <AppBar position="static" sx={{ bgcolor: '#BB2D40', zIndex: 1100 }}>
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             VStorage Explorer
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
             <Typography variant="body1" sx={{ mr: 2 }}>
               Height: {currentBlockHeight}
             </Typography>
@@ -216,13 +224,13 @@ const App = () => {
                 setBlockHeight(e.target.value);
               }}
               style={{
-                width: "150px",
-                padding: "5px",
-                borderRadius: "16px",
-                border: "1px solid #eee", // Lighter border color
-                backgroundColor: "rgba(255, 255, 255, 0.15)",
-                color: "#f0f0f0", // Lighter text color
-                textAlign: "center",
+                width: '150px',
+                padding: '5px',
+                borderRadius: '16px',
+                border: '1px solid #eee', // Lighter border color
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                color: '#f0f0f0', // Lighter text color
+                textAlign: 'center',
               }}
             />
             <IconButton
@@ -245,15 +253,15 @@ const App = () => {
           </Box>
           <Select
             sx={{
-              bgcolor: "rgba(255, 255, 255, 0.15)", // Semi-transparent white background
+              bgcolor: 'rgba(255, 255, 255, 0.15)', // Semi-transparent white background
               height: 32,
-              borderRadius: "16px", // Rounded corners
+              borderRadius: '16px', // Rounded corners
             }}
             value={apiEndpoint}
             onChange={handleEndpointChange}
             displayEmpty
-            inputProps={{ "aria-label": "Without label" }}
-            style={{ color: "white", bgcolor: "#ed2c2c" }}
+            inputProps={{ 'aria-label': 'Without label' }}
+            style={{ color: 'white', bgcolor: '#ed2c2c' }}
           >
             {apiEndpoints.map((endpoint) => (
               <MenuItem key={endpoint.value} value={endpoint.value}>
@@ -266,15 +274,15 @@ const App = () => {
       {loading && (
         <Box
           sx={{
-            position: "fixed",
+            position: 'fixed',
             top: 0,
             left: 0,
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
             zIndex: 1500,
           }}
         >
@@ -286,25 +294,18 @@ const App = () => {
         defaultSize="50%"
         minSize={100}
         maxSize={400}
-        style={{ position: "relative", width: "100%", height: "100%" }}
+        style={{ position: 'relative', width: '100%', height: '100%' }}
       >
         <MillerColumns
           columns={columns}
           onItemSelected={handleItemSelected}
           isLoading={loading}
         />
-        <Box sx={{ position: "relative", paddingBottom: "60px" }}>
+        <Box sx={{ position: 'relative', paddingBottom: '60px' }}>
           <Tooltip title="Copy Data">
             <IconButton
-              onClick={() =>
-                navigator.clipboard.writeText(
-                  JSON.stringify(
-                    decodeValues(dataValue.values),
-                    bigIntReplacer,
-                  ),
-                )
-              }
-              sx={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}
+              onClick={() => navigator.clipboard.writeText(dataValue.values)}
+              sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
             >
               <ContentCopyIcon />
             </IconButton>
@@ -314,15 +315,15 @@ const App = () => {
       </SplitPane>
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "2px",
-          backgroundColor: "#ffffff",
-          borderTop: "1px solid #ccc",
-          position: "fixed",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '2px',
+          backgroundColor: '#ffffff',
+          borderTop: '1px solid #ccc',
+          position: 'fixed',
           bottom: 0,
-          width: "100%",
+          width: '100%',
           zIndex: 1100,
         }}
       >
@@ -331,7 +332,7 @@ const App = () => {
           href="https://github.com/agoric-labs/vstorage-viewer"
           target="_blank"
           rel="noopener noreferrer"
-          sx={{ color: "inherit" }}
+          sx={{ color: 'inherit' }}
         >
           <img
             src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
@@ -339,9 +340,6 @@ const App = () => {
             style={{ width: 48, height: 48 }}
           />
         </IconButton>
-        <Typography variant="body2" sx={{ ml: "auto", mr: 2 }}>
-          {`/custom/vstorage/children/${path ? `${path}` : ""} ${walletId ? `(${walletId})` : ""}`}
-        </Typography>
       </Box>
     </Box>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   List,
@@ -6,12 +6,12 @@ import {
   ListItemText,
   InputAdornment,
   TextField,
-} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 const MillerColumns = ({ columns, onItemSelected }) => {
   const [filterTexts, setFilterTexts] = useState(
-    Array(columns.length).fill(""),
+    Array(columns.length).fill(''),
   );
 
   const debounceTimeouts = useRef([]);
@@ -31,7 +31,7 @@ const MillerColumns = ({ columns, onItemSelected }) => {
   const fullColumns = [...columns];
 
   useEffect(() => {
-    setFilterTexts(Array(columns.length).fill(""));
+    setFilterTexts(Array(columns.length).fill(''));
   }, [columns]);
   while (fullColumns.length < 6) {
     fullColumns.push([]); // Add empty arrays for missing columns
@@ -53,30 +53,30 @@ const MillerColumns = ({ columns, onItemSelected }) => {
             <List
               key={columnIndex}
               style={{
-                minWidth: "200px",
-                width: "auto",
-                overflowY: "auto",
-                borderRadius: "8px",
-                backgroundColor: "#ffffff",
-                minHeight: "350px",
-                maxHeight: "350px",
-                margin: "10px 5px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                minWidth: '200px',
+                width: 'auto',
+                overflowY: 'auto',
+                borderRadius: '8px',
+                backgroundColor: '#ffffff',
+                minHeight: '350px',
+                maxHeight: '350px',
+                margin: '10px 5px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               }}
             >
               {column.items.length > 10 && (
                 <Box
                   key={`input-container-${columnIndex}`}
                   sx={{
-                    position: "sticky",
+                    position: 'sticky',
                     top: 0,
                     zIndex: 1,
-                    backgroundColor: "#ffffff",
+                    backgroundColor: '#ffffff',
                   }}
                 >
                   <ListItem
                     key={`input-${columnIndex}`}
-                    style={{ padding: "0px 16px" }}
+                    style={{ padding: '0px 16px' }}
                   >
                     <TextField
                       variant="outlined"
@@ -93,11 +93,11 @@ const MillerColumns = ({ columns, onItemSelected }) => {
                         ),
                       }}
                       sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "16px", // Rounded corners
-                          "& .MuiOutlinedInput-input": {
-                            fontSize: "0.75rem", // Increased font size
-                            padding: "8px 14px", // Increased height
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '16px', // Rounded corners
+                          '& .MuiOutlinedInput-input': {
+                            fontSize: '0.75rem', // Increased font size
+                            padding: '8px 14px', // Increased height
                           },
                         },
                       }}
@@ -119,9 +119,9 @@ const MillerColumns = ({ columns, onItemSelected }) => {
                     selected={item.isSelected}
                     style={{
                       backgroundColor: item.isSelected
-                        ? "#F7A1A7"
-                        : "transparent",
-                      padding: "0px 16px",
+                        ? '#F7A1A7'
+                        : 'transparent',
+                      padding: '0px 16px',
                     }}
                   >
                     <ListItemText primary={item.name} />

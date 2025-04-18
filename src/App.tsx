@@ -18,12 +18,9 @@ import apiEndpoints from './config';
 import ContentPane from './ContentPane';
 import MillerColumns from './MillerColumns';
 import { makeVstorageKit } from '@agoric/client-utils';
+import type { StreamCell } from '@agoric/internal/src/lib-chainStorage.js';
 
 import './App.css';
-
-/**
- * @import {StreamCell} from '@agoric/internal/src/lib-chainStorage.js';
- */
 
 const updateQueryParam = (key, value) => {
   const params = new URLSearchParams(window.location.search);
@@ -53,14 +50,12 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [path, setPath] = useState(searchParams.get('path'));
   const [columns, setColumns] = useState(getInitialColumns(path));
-  const [cell, setCell] = useState(
-    /** @type {StreamCell<string> | null} */ (null),
-  );
+  const [cell, setCell] = useState<StreamCell<string> | null>(null);
   const [blockHeight, setBlockHeight] = useState(
     Number(searchParams.get('height')) || undefined,
   );
-  const [currentBlockHeight, setCurrentBlockHeight] = useState(
-    /** @type {number | null} */ (null),
+  const [currentBlockHeight, setCurrentBlockHeight] = useState<number | null>(
+    null,
   );
   const initialEndpoint = searchParams.get('endpoint') || apiEndpoints[0].value;
   const [apiEndpoint, setApiEndpoint] = useState(initialEndpoint);
@@ -118,8 +113,7 @@ const App = () => {
       .readStorage(dataPath, { kind: 'data', height: blockHeight })
       .then((response) => {
         if (response.value) {
-          /** @type {import('@agoric/internal/src/lib-chainStorage.js').StreamCell<string>} */
-          const cell = JSON.parse(response.value);
+          const cell = JSON.parse(response.value) as StreamCell<string>;
           setCell(cell);
           setCurrentBlockHeight(Number(cell.blockHeight));
         }

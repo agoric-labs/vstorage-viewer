@@ -32,8 +32,7 @@ const MillerColumns: FC<MillerColumnsProps> = ({ columns, onItemSelected }) => {
     Array(columns.length).fill(''),
   );
 
-  // Type the ref for debounce timeouts (NodeJS.Timeout for Node env, number for browser)
-  const debounceTimeouts = useRef<(NodeJS.Timeout | number | null)[]>([]); // Use number for browser compatibility
+  const debounceTimeouts = useRef<(number | null)[]>([]); // Use number for browser compatibility
 
   // Type the event and columnIndex parameter
   const handleFilterChange = (

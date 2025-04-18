@@ -32,6 +32,7 @@ const updateQueryParam = (key, value) => {
 };
 
 const getInitialColumns = (path) => {
+const getInitialColumns = (path: string) => {
   const defaultColumn = { items: [] };
   if (!path) return [defaultColumn];
 
@@ -260,7 +261,7 @@ const App = () => {
             onChange={handleEndpointChange}
             displayEmpty
             inputProps={{ 'aria-label': 'Without label' }}
-            style={{ color: 'white', bgcolor: '#ed2c2c' }}
+            style={{ color: 'white', backgroundColor: '#ed2c2c' }}
           >
             {apiEndpoints.map((endpoint) => (
               <MenuItem key={endpoint.value} value={endpoint.value}>

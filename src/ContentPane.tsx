@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent } from 'react';
 import { Box, Switch, FormControlLabel } from '@mui/material';
 import ReactJson from 'react-json-view';
-import { decodeValues } from './api.js'; // Assuming decodeValues returns any[] for now
+import { decodeValues } from './api.js';
 
 interface ContentPaneProps {
   blockHeight: string | null; // Allow null for 'Latest'

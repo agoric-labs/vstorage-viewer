@@ -22,7 +22,7 @@ import type { StreamCell } from '@agoric/internal/src/lib-chainStorage.js';
 
 import './App.css';
 
-const updateQueryParam = (key, value) => {
+const updateQueryParam = (key: string, value: string) => {
   const params = new URLSearchParams(window.location.search);
   params.set(key, value);
   const newUrl = `${window.location.protocol}//${window.location.host}${
@@ -31,7 +31,6 @@ const updateQueryParam = (key, value) => {
   window.history.pushState({ path: newUrl }, '', newUrl);
 };
 
-const getInitialColumns = (path) => {
 const getInitialColumns = (path: string) => {
   const defaultColumn = { items: [] };
   if (!path) return [defaultColumn];

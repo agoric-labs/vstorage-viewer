@@ -12,7 +12,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import SplitPane from 'react-split-pane';
 import apiEndpoints from './config';
 import ContentPane from './ContentPane';
@@ -65,10 +65,15 @@ const App = () => {
   const initialEndpoint = searchParams.get('endpoint') || apiEndpoints[0].value;
   const [apiEndpoint, setApiEndpoint] = useState(initialEndpoint);
 
-  const vstorageKit = makeVstorageKit(
-    { fetch },
-    { chainName: 'agoric', rpcAddrs: [apiEndpoint] },
+  const vstorageKit = useMemo(
+    () =>
+      makeVstorageKit(
+        { fetch },
+        { chainName: 'agoric', rpcAddrs: [apiEndpoint] },
+      ),
+    [apiEndpoint],
   );
+
   const { vstorage } = vstorageKit;
 
   useEffect(() => {

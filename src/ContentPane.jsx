@@ -5,7 +5,7 @@ import { decodeValues } from './api.js';
 
 /**
  * @param {object} props
- * @param {number} props.blockHeight
+ * @param {string} props.blockHeight
  * @param {string[]} props.values
  */
 const ContentPane = ({ blockHeight, values }) => {

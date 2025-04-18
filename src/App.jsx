@@ -22,7 +22,7 @@ import { makeVstorageKit } from '@agoric/client-utils';
 import './App.css';
 
 /**
- * @import {StreamCell} from '@agoric/casting';
+ * @import {StreamCell} from '@agoric/internal/src/lib-chainStorage.js';
  */
 
 const updateQueryParam = (key, value) => {
@@ -53,8 +53,8 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [path, setPath] = useState(searchParams.get('path'));
   const [columns, setColumns] = useState(getInitialColumns(path));
-  const [dataValue, setDataValue] = useState(
-    /** @type {StreamCell<string>} */ ({}),
+  const [cell, setCell] = useState(
+    /** @type {StreamCell<string> | null} */ (null),
   );
   const [blockHeight, setBlockHeight] = useState(
     Number(searchParams.get('height')) || undefined,
@@ -118,9 +118,9 @@ const App = () => {
       .readStorage(dataPath, { kind: 'data', height: blockHeight })
       .then((response) => {
         if (response.value) {
-          /** @type {import('@agoric/internal/src/lib-chainStorage.js').StreamCell} */
+          /** @type {import('@agoric/internal/src/lib-chainStorage.js').StreamCell<string>} */
           const cell = JSON.parse(response.value);
-          setDataValue(cell);
+          setCell(cell);
           setCurrentBlockHeight(Number(cell.blockHeight));
         }
       })
@@ -148,7 +148,7 @@ const App = () => {
     // Return early if the item is already selected
     if (columns[columnIndex]?.selected === itemName) return;
 
-    setDataValue({});
+    setCell(null);
     const newColumns = columns.slice(0, columnIndex + 1);
     newColumns[columnIndex] = {
       ...newColumns[columnIndex],
@@ -309,13 +309,15 @@ const App = () => {
         <Box sx={{ position: 'relative', paddingBottom: '60px' }}>
           <Tooltip title="Copy Data">
             <IconButton
-              onClick={() => navigator.clipboard.writeText(dataValue.values)}
+              onClick={() =>
+                cell && navigator.clipboard.writeText(cell.values.join('\n'))
+              }
               sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
             >
               <ContentCopyIcon />
             </IconButton>
           </Tooltip>
-          {dataValue && <ContentPane {...dataValue} />}
+          {cell && <ContentPane {...cell} />}
         </Box>
       </SplitPane>
       <Box

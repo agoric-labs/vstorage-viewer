@@ -4,7 +4,6 @@ import {
   InputAdornment,
   List,
   ListItem,
-  ListItem,
   ListItemText,
   TextField,
 } from '@mui/material';
@@ -83,7 +82,6 @@ const MillerColumns: FC<MillerColumnsProps> = ({ columns, onItemSelected }) => {
       if (timeoutId) clearTimeout(timeoutId);
     });
     debounceTimeouts.current = Array(columns.length).fill(null);
-
   }, [columns]);
 
   // Type the column and columnIndex parameters in map
@@ -178,12 +176,17 @@ const MillerColumns: FC<MillerColumnsProps> = ({ columns, onItemSelected }) => {
                     key={`${item.name}-${columnIndex}-${itemIndex}`} // More robust key
                     onClick={() => onItemSelected(item.name, columnIndex)}
                     selected={item.isSelected}
-                    sx={{ // Prefer sx prop over style for MUI components
-                      backgroundColor: item.isSelected ? '#F7A1A7' : 'transparent',
+                    sx={{
+                      // Prefer sx prop over style for MUI components
+                      backgroundColor: item.isSelected
+                        ? '#F7A1A7'
+                        : 'transparent',
                       padding: '0px 16px', // Keep padding if specific override needed
                       // Example of hover effect using sx
                       '&:hover': {
-                        backgroundColor: item.isSelected ? '#F7A1A7' : '#f0f0f0', // Keep selection color or use light gray
+                        backgroundColor: item.isSelected
+                          ? '#F7A1A7'
+                          : '#f0f0f0', // Keep selection color or use light gray
                       },
                     }}
                   >

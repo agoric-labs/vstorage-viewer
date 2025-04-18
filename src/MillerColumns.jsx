@@ -1,41 +1,99 @@
-import React, { useState, useRef, useEffect } from 'react';
+import SearchIcon from '@mui/icons-material/Search';
 import {
   Box,
+  InputAdornment,
   List,
   ListItem,
+  ListItem,
   ListItemText,
-  InputAdornment,
   TextField,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import React, { type FC, useEffect, useRef, useState } from 'react';
 
-const MillerColumns = ({ columns, onItemSelected }) => {
-  const [filterTexts, setFilterTexts] = useState(
+// Define interfaces consistent with App.tsx
+interface Item {
+  name: string;
+  isSelected: boolean;
+}
+
+interface Column {
+  items: Item[];
+  selected?: string; // Optional selected item name in the *next* column
+}
+
+// Define props interface
+interface MillerColumnsProps {
+  columns: Column[];
+  onItemSelected: (itemName: string, columnIndex: number) => void;
+}
+
+const MillerColumns: FC<MillerColumnsProps> = ({ columns, onItemSelected }) => {
+  // Type the state for filter texts
+  const [filterTexts, setFilterTexts] = useState<string[]>(
     Array(columns.length).fill(''),
   );
 
-  const debounceTimeouts = useRef([]);
+  // Type the ref for debounce timeouts (NodeJS.Timeout for Node env, number for browser)
+  const debounceTimeouts = useRef<(NodeJS.Timeout | number | null)[]>([]); // Use number for browser compatibility
 
-  const handleFilterChange = (e, columnIndex) => {
+  // Type the event and columnIndex parameter
+  const handleFilterChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    columnIndex: number,
+  ) => {
+    const eventValue = e.target.value; // Capture value here
     const newFilterTexts = [...filterTexts];
-    newFilterTexts[columnIndex] = e.target.value;
+    newFilterTexts[columnIndex] = eventValue;
 
-    if (debounceTimeouts.current[columnIndex]) {
-      clearTimeout(debounceTimeouts.current[columnIndex]);
+    // Clear existing timeout if present
+    const currentTimeout = debounceTimeouts.current[columnIndex];
+    if (currentTimeout) {
+      clearTimeout(currentTimeout);
     }
 
+    // Set new timeout
     debounceTimeouts.current[columnIndex] = setTimeout(() => {
-      setFilterTexts(newFilterTexts);
+      // Update state using the captured value
+      setFilterTexts((prevTexts) => {
+        const updatedTexts = [...prevTexts];
+        updatedTexts[columnIndex] = eventValue;
+        return updatedTexts;
+      });
     }, 300); // 300ms delay
   };
-  const fullColumns = [...columns];
 
+  // Ensure filterTexts array is updated when columns change length
   useEffect(() => {
-    setFilterTexts(Array(columns.length).fill(''));
+    setFilterTexts((prevTexts) => {
+      const newLength = columns.length;
+      if (prevTexts.length === newLength) {
+        return prevTexts; // No change needed
+      }
+      // Adjust length, preserving existing filters
+      const newTexts = Array(newLength).fill('');
+      for (let i = 0; i < Math.min(prevTexts.length, newLength); i++) {
+        newTexts[i] = prevTexts[i];
+      }
+      return newTexts;
+    });
+
+    // Also clear timeouts when columns change to avoid memory leaks
+    // or operating on stale indices
+    debounceTimeouts.current.forEach((timeoutId) => {
+      if (timeoutId) clearTimeout(timeoutId);
+    });
+    debounceTimeouts.current = Array(columns.length).fill(null);
+
   }, [columns]);
-  while (fullColumns.length < 6) {
-    fullColumns.push([]); // Add empty arrays for missing columns
-  }
+
+  // Type the column and columnIndex parameters in map
+  // Note: The logic to pad with empty arrays seems incorrect for the Column type.
+  // Assuming the goal is just to render the provided columns.
+  // If padding is truly needed, the pushed elements should conform to Column interface.
+  // const fullColumns = [...columns]; // This is typed as Column[]
+  // while (fullColumns.length < 6) {
+  //   fullColumns.push({ items: [] }); // Push valid Column objects if padding
+  // }
 
   return (
     <Box
@@ -46,12 +104,13 @@ const MillerColumns = ({ columns, onItemSelected }) => {
       bgcolor="#f7f7f7"
       position="relative"
     >
-      {fullColumns.map(
-        (column, columnIndex) =>
-          column.items &&
-          column.items.length > 0 && (
+      {/* Map directly over the columns prop */}
+      {columns.map(
+        (column: Column, columnIndex: number) =>
+          // Check if column and column.items exist and have length
+          column?.items?.length > 0 && (
             <List
-              key={columnIndex}
+              key={`column-${columnIndex}`} // Use a more specific key
               style={{
                 minWidth: '200px',
                 width: 'auto',
@@ -105,23 +164,27 @@ const MillerColumns = ({ columns, onItemSelected }) => {
                   </ListItem>
                 </Box>
               )}
+              {/* Type the item and itemIndex parameters in filter/map */}
               {column.items
-                .filter((item) =>
+                .filter((item: Item) =>
                   item.name
                     .toLowerCase()
-                    .includes(filterTexts[columnIndex].toLowerCase()),
+                    // Ensure filterTexts[columnIndex] exists before calling toLowerCase()
+                    .includes((filterTexts[columnIndex] ?? '').toLowerCase()),
                 )
-                .map((item, itemIndex) => (
+                .map((item: Item, itemIndex: number) => (
                   <ListItem
                     button
-                    key={`${item.name}-${itemIndex}`}
+                    key={`${item.name}-${columnIndex}-${itemIndex}`} // More robust key
                     onClick={() => onItemSelected(item.name, columnIndex)}
                     selected={item.isSelected}
-                    style={{
-                      backgroundColor: item.isSelected
-                        ? '#F7A1A7'
-                        : 'transparent',
-                      padding: '0px 16px',
+                    sx={{ // Prefer sx prop over style for MUI components
+                      backgroundColor: item.isSelected ? '#F7A1A7' : 'transparent',
+                      padding: '0px 16px', // Keep padding if specific override needed
+                      // Example of hover effect using sx
+                      '&:hover': {
+                        backgroundColor: item.isSelected ? '#F7A1A7' : '#f0f0f0', // Keep selection color or use light gray
+                      },
                     }}
                   >
                     <ListItemText primary={item.name} />

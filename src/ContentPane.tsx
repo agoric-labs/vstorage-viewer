@@ -1,29 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { Box, Switch, FormControlLabel } from '@mui/material';
 import ReactJson from 'react-json-view';
 import { decodeValues } from './api.js';
 
-/**
- * @param {object} props
- * @param {number} props.blockHeight
- * @param {string[]} props.values
- */
-const ContentPane = ({ blockHeight, values }) => {
+interface ContentPaneProps {
+  blockHeight: string | null; // Allow null for 'Latest'
+  values: string[] | null; // Allow null if no values
+}
+
+const ContentPane: React.FC<ContentPaneProps> = ({ blockHeight, values }) => {
   console.debug('ContentPane', { blockHeight, values });
   const [showRaw, setShowRaw] = useState(false);
 
-  const handleToggleChange = (event) => {
+  const handleToggleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setShowRaw(event.target.checked);
   };
 
   if (!values) {
-    return null;
+    return null; // Return null if values is null
   }
 
-  const rawValues = values.map(JSON.parse) ?? [];
+  // Safely parse JSON, handling potential errors
+  const rawValues = values
+    .map((v) => {
+      try {
+        return JSON.parse(v);
+      } catch (e) {
+        console.error('Failed to parse JSON string:', v, e);
+        return { error: 'Invalid JSON', originalValue: v }; // Represent error state
+      }
+    })
+    .filter((v) => v !== undefined); // Filter out undefined results from errors if needed
 
-  // Decode only when needed
-  const decodedValues = !showRaw && decodeValues(values);
+  // Decode only when needed, ensure values is not null
+  const decodedValues = !showRaw ? decodeValues(values) : [];
 
   return (
     <div>

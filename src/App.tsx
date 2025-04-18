@@ -12,20 +12,17 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import SplitPane from 'react-split-pane';
 import apiEndpoints from './config';
 import ContentPane from './ContentPane';
 import MillerColumns from './MillerColumns';
 import { makeVstorageKit } from '@agoric/client-utils';
+import type { StreamCell } from '@agoric/internal/src/lib-chainStorage.js';
 
 import './App.css';
 
-/**
- * @import {StreamCell} from '@agoric/casting';
- */
-
-const updateQueryParam = (key, value) => {
+const updateQueryParam = (key: string, value: string) => {
   const params = new URLSearchParams(window.location.search);
   params.set(key, value);
   const newUrl = `${window.location.protocol}//${window.location.host}${
@@ -34,7 +31,7 @@ const updateQueryParam = (key, value) => {
   window.history.pushState({ path: newUrl }, '', newUrl);
 };
 
-const getInitialColumns = (path) => {
+const getInitialColumns = (path: string) => {
   const defaultColumn = { items: [] };
   if (!path) return [defaultColumn];
 
@@ -53,22 +50,25 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [path, setPath] = useState(searchParams.get('path'));
   const [columns, setColumns] = useState(getInitialColumns(path));
-  const [dataValue, setDataValue] = useState(
-    /** @type {StreamCell<string>} */ ({}),
-  );
+  const [cell, setCell] = useState<StreamCell<string> | null>(null);
   const [blockHeight, setBlockHeight] = useState(
     Number(searchParams.get('height')) || undefined,
   );
-  const [currentBlockHeight, setCurrentBlockHeight] = useState(
-    /** @type {number | null} */ (null),
+  const [currentBlockHeight, setCurrentBlockHeight] = useState<number | null>(
+    null,
   );
   const initialEndpoint = searchParams.get('endpoint') || apiEndpoints[0].value;
   const [apiEndpoint, setApiEndpoint] = useState(initialEndpoint);
 
-  const vstorageKit = makeVstorageKit(
-    { fetch },
-    { chainName: 'agoric', rpcAddrs: [apiEndpoint] },
+  const vstorageKit = useMemo(
+    () =>
+      makeVstorageKit(
+        { fetch },
+        { chainName: 'agoric', rpcAddrs: [apiEndpoint] },
+      ),
+    [apiEndpoint],
   );
+
   const { vstorage } = vstorageKit;
 
   useEffect(() => {
@@ -113,9 +113,8 @@ const App = () => {
       .readStorage(dataPath, { kind: 'data', height: blockHeight })
       .then((response) => {
         if (response.value) {
-          /** @type {import('@agoric/internal/src/lib-chainStorage.js').StreamCell} */
-          const cell = JSON.parse(response.value);
-          setDataValue(cell);
+          const cell = JSON.parse(response.value) as StreamCell<string>;
+          setCell(cell);
           setCurrentBlockHeight(Number(cell.blockHeight));
         }
       })
@@ -143,7 +142,7 @@ const App = () => {
     // Return early if the item is already selected
     if (columns[columnIndex]?.selected === itemName) return;
 
-    setDataValue({});
+    setCell(null);
     const newColumns = columns.slice(0, columnIndex + 1);
     newColumns[columnIndex] = {
       ...newColumns[columnIndex],
@@ -261,7 +260,7 @@ const App = () => {
             onChange={handleEndpointChange}
             displayEmpty
             inputProps={{ 'aria-label': 'Without label' }}
-            style={{ color: 'white', bgcolor: '#ed2c2c' }}
+            style={{ color: 'white', backgroundColor: '#ed2c2c' }}
           >
             {apiEndpoints.map((endpoint) => (
               <MenuItem key={endpoint.value} value={endpoint.value}>
@@ -304,13 +303,15 @@ const App = () => {
         <Box sx={{ position: 'relative', paddingBottom: '60px' }}>
           <Tooltip title="Copy Data">
             <IconButton
-              onClick={() => navigator.clipboard.writeText(dataValue.values)}
+              onClick={() =>
+                cell && navigator.clipboard.writeText(cell.values.join('\n'))
+              }
               sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
             >
               <ContentCopyIcon />
             </IconButton>
           </Tooltip>
-          {dataValue && <ContentPane {...dataValue} />}
+          {cell && <ContentPane {...cell} />}
         </Box>
       </SplitPane>
       <Box

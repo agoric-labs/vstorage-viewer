@@ -57,6 +57,7 @@ const App = () => {
   const [currentBlockHeight, setCurrentBlockHeight] = useState<number | null>(
     null,
   );
+  const [blockTime, setBlockTime] = useState<string | null>(null);
   const initialEndpoint = searchParams.get('endpoint') || apiEndpoints[0].value;
   const [apiEndpoint, setApiEndpoint] = useState(initialEndpoint);
 
@@ -70,6 +71,57 @@ const App = () => {
   );
 
   const { vstorage } = vstorageKit;
+
+  const fetchBlockTime = async (height: number) => {
+    try {
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'block',
+          params: { height: height.toString() },
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.result && data.result.block && data.result.block.header) {
+        const timestamp = data.result.block.header.time;
+        const blockDate = new Date(timestamp);
+        const now = new Date();
+        
+        // Format date with user's local timezone
+        const formattedDate = blockDate.toLocaleString();
+        
+        // Calculate days ago
+        const diffTime = now.getTime() - blockDate.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        let timeAgo = '';
+        if (diffDays === 0) {
+          const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+          if (diffHours === 0) {
+            const diffMinutes = Math.floor(diffTime / (1000 * 60));
+            timeAgo = diffMinutes <= 1 ? '(just now)' : `(${diffMinutes} min ago)`;
+          } else {
+            timeAgo = diffHours === 1 ? '(1 hour ago)' : `(${diffHours} hours ago)`;
+          }
+        } else if (diffDays === 1) {
+          timeAgo = '(1 day ago)';
+        } else {
+          timeAgo = `(${diffDays} days ago)`;
+        }
+        
+        setBlockTime(`${formattedDate} ${timeAgo}`);
+      }
+    } catch (error) {
+      console.error('Failed to fetch block time:', error);
+      setBlockTime(null);
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -115,7 +167,9 @@ const App = () => {
         if (response.value) {
           const cell = JSON.parse(response.value) as StreamCell<string>;
           setCell(cell);
-          setCurrentBlockHeight(Number(cell.blockHeight));
+          const height = Number(cell.blockHeight);
+          setCurrentBlockHeight(height);
+          fetchBlockTime(height);
         }
       })
       .catch((e) => console.error('readStorage failed parsing response', e));
@@ -319,15 +373,23 @@ const App = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '2px',
+          padding: '8px 16px',
           backgroundColor: '#ffffff',
           borderTop: '1px solid #ccc',
           position: 'fixed',
           bottom: 0,
-          width: '100%',
+          left: 0,
+          right: 0,
           zIndex: 1100,
         }}
       >
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {blockTime && (
+            <Typography variant="body2" sx={{ color: '#666', mr: 2 }}>
+              Block Time: {blockTime}
+            </Typography>
+          )}
+        </Box>
         <IconButton
           component="a"
           href="https://github.com/agoric-labs/vstorage-viewer"
@@ -338,7 +400,7 @@ const App = () => {
           <img
             src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
             alt="GitHub Logo"
-            style={{ width: 48, height: 48 }}
+            style={{ width: 32, height: 32 }}
           />
         </IconButton>
       </Box>

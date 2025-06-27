@@ -90,8 +90,32 @@ const App = () => {
       const data = await response.json();
       if (data.result && data.result.block && data.result.block.header) {
         const timestamp = data.result.block.header.time;
-        const blockTime = new Date(timestamp).toLocaleString();
-        setBlockTime(blockTime);
+        const blockDate = new Date(timestamp);
+        const now = new Date();
+        
+        // Format date with user's local timezone
+        const formattedDate = blockDate.toLocaleString();
+        
+        // Calculate days ago
+        const diffTime = now.getTime() - blockDate.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        let timeAgo = '';
+        if (diffDays === 0) {
+          const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+          if (diffHours === 0) {
+            const diffMinutes = Math.floor(diffTime / (1000 * 60));
+            timeAgo = diffMinutes <= 1 ? '(just now)' : `(${diffMinutes} min ago)`;
+          } else {
+            timeAgo = diffHours === 1 ? '(1 hour ago)' : `(${diffHours} hours ago)`;
+          }
+        } else if (diffDays === 1) {
+          timeAgo = '(1 day ago)';
+        } else {
+          timeAgo = `(${diffDays} days ago)`;
+        }
+        
+        setBlockTime(`${formattedDate} ${timeAgo}`);
       }
     } catch (error) {
       console.error('Failed to fetch block time:', error);

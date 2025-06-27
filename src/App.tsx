@@ -21,6 +21,7 @@ import { makeVstorageKit } from '@agoric/client-utils';
 import type { StreamCell } from '@agoric/internal/src/lib-chainStorage.js';
 
 import './App.css';
+import { getBlockExplorerUrl } from './utils';
 
 const updateQueryParam = (key: string, value: string) => {
   const params = new URLSearchParams(window.location.search);
@@ -248,7 +249,18 @@ const App = () => {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
             <Typography variant="body1" sx={{ mr: 2 }}>
-              Height: {currentBlockHeight}
+              Height: {currentBlockHeight && getBlockExplorerUrl(apiEndpoint, currentBlockHeight) ? (
+                <a 
+                  href={getBlockExplorerUrl(apiEndpoint, currentBlockHeight)} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ color: 'inherit', textDecoration: 'underline' }}
+                >
+                  {currentBlockHeight}
+                </a>
+              ) : (
+                currentBlockHeight
+              )}
             </Typography>
             <IconButton
               onClick={() => {
@@ -365,7 +377,7 @@ const App = () => {
               <ContentCopyIcon />
             </IconButton>
           </Tooltip>
-          {cell && <ContentPane {...cell} />}
+          {cell && <ContentPane {...cell} apiEndpoint={apiEndpoint} />}
         </Box>
       </SplitPane>
       <Box

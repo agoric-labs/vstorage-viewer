@@ -2,13 +2,15 @@ import React, { useState, ChangeEvent } from 'react';
 import { Box, Switch, FormControlLabel } from '@mui/material';
 import ReactJson from 'react-json-view';
 import { decodeValues } from './api.js';
+import { getBlockExplorerUrl } from './utils';
 
 interface ContentPaneProps {
   blockHeight: string | null; // Allow null for 'Latest'
   values: string[] | null; // Allow null if no values
+  apiEndpoint: string;
 }
 
-const ContentPane: React.FC<ContentPaneProps> = ({ blockHeight, values }) => {
+const ContentPane: React.FC<ContentPaneProps> = ({ blockHeight, values, apiEndpoint }) => {
   console.debug('ContentPane', { blockHeight, values });
   const [showRaw, setShowRaw] = useState(false);
 
@@ -48,7 +50,18 @@ const ContentPane: React.FC<ContentPaneProps> = ({ blockHeight, values }) => {
         padding={2}
         style={{ whiteSpace: 'pre-wrap' }}
       >
-        Block: <tt>{blockHeight || 'Latest'}</tt>
+        Block: <tt>{blockHeight && blockHeight !== 'Latest' && getBlockExplorerUrl(apiEndpoint, parseInt(blockHeight)) ? (
+          <a 
+            href={getBlockExplorerUrl(apiEndpoint, parseInt(blockHeight))} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ color: 'inherit', textDecoration: 'underline' }}
+          >
+            {blockHeight}
+          </a>
+        ) : (
+          blockHeight || 'Latest'
+        )}</tt>
       </Box>
 
       {/* Toggle Switch */}

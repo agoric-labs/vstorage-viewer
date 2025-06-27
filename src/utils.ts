@@ -4,7 +4,7 @@ export const getBlockExplorerUrl = (endpoint: string, blockHeight: number): stri
   if (match) {
     const networkPrefix = match[1];
     // Special case for mainnet which uses 'followmain' in explorer
-    const explorerPrefix = networkPrefix === 'main-a' ? 'followmain' : networkPrefix;
+    const explorerPrefix = networkPrefix.startsWith('main') ? 'followmain' : networkPrefix;
     return `https://${explorerPrefix}.explorer.agoric.net/agoric/block/${blockHeight}`;
   }
   return '';

@@ -21,7 +21,7 @@ import { makeVstorageKit } from '@agoric/client-utils';
 import type { StreamCell } from '@agoric/internal/src/lib-chainStorage.js';
 
 import './App.css';
-import { getBlockExplorerUrl } from './utils';
+import { getBlockExplorerUrl, getNetworkColor } from './utils';
 
 const updateQueryParam = (key: string, value: string) => {
   const params = new URLSearchParams(window.location.search);
@@ -242,7 +242,7 @@ const App = () => {
         width: '100%',
       }}
     >
-      <AppBar position="static" sx={{ bgcolor: '#BB2D40', zIndex: 1100 }}>
+      <AppBar position="static" sx={{ bgcolor: getNetworkColor(apiEndpoint), zIndex: 1100 }}>
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             VStorage Explorer
@@ -326,7 +326,7 @@ const App = () => {
             onChange={handleEndpointChange}
             displayEmpty
             inputProps={{ 'aria-label': 'Without label' }}
-            style={{ color: 'white', backgroundColor: '#ed2c2c' }}
+            style={{ color: 'white', backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
           >
             {apiEndpoints.map((endpoint) => (
               <MenuItem key={endpoint.value} value={endpoint.value}>

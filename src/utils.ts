@@ -17,10 +17,10 @@ export const getBlockExplorerUrl = (endpoint: string, blockHeight: number): stri
 export const getNetworkColor = (endpoint: string): string => {
   // Extract network identifier from endpoint
   if (endpoint.includes('main-a.rpc.agoric.net')) {
-    return '#2E7D32'; // Green for mainnet (production)
+    return '#BB2D40'; // Agoric red for mainnet (production)
   }
   if (endpoint.includes('emerynet.rpc.agoric.net')) {
-    return '#7B1FA2'; // Purple for emerynet
+    return '#2E7D32'; // Green for emerynet (emerald)
   }
   if (endpoint.includes('devnet.rpc.agoric.net')) {
     return '#F57C00'; // Orange for devnet (development)

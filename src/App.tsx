@@ -242,7 +242,7 @@ const App = () => {
         width: '100%',
       }}
     >
-      <AppBar position="static" sx={{ bgcolor: getNetworkColor(apiEndpoint), zIndex: 1100 }}>
+      <AppBar position="fixed" sx={{ bgcolor: getNetworkColor(apiEndpoint), zIndex: 1100 }}>
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             VStorage Explorer
@@ -359,7 +359,7 @@ const App = () => {
         defaultSize="50%"
         minSize={100}
         maxSize={400}
-        style={{ position: 'relative', width: '100%', height: '100%' }}
+        style={{ position: 'relative', width: '100%', height: 'calc(100% - 64px)', marginTop: '64px' }}
       >
         <MillerColumns
           columns={columns}

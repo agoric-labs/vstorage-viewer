@@ -10,8 +10,11 @@ interface ContentPaneProps {
   apiEndpoint: string;
 }
 
-const ContentPane: React.FC<ContentPaneProps> = ({ blockHeight, values, apiEndpoint }) => {
-}) => {
+const ContentPane: React.FC<ContentPaneProps> = ({
+  blockHeight,
+  values,
+  apiEndpoint,
+} = {}) => {
   console.debug('ContentPane', { blockHeight, values });
   const [showRaw, setShowRaw] = useState(false);
 
@@ -51,18 +54,23 @@ const ContentPane: React.FC<ContentPaneProps> = ({ blockHeight, values, apiEndpo
         padding={2}
         style={{ whiteSpace: 'pre-wrap' }}
       >
-        Block: <tt>{blockHeight && blockHeight !== 'Latest' && getBlockExplorerUrl(apiEndpoint, parseInt(blockHeight)) ? (
-          <a 
-            href={getBlockExplorerUrl(apiEndpoint, parseInt(blockHeight))} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{ color: 'inherit', textDecoration: 'underline' }}
-          >
-            {blockHeight}
-          </a>
-        ) : (
-          blockHeight || 'Latest'
-        )}</tt>
+        Block:{' '}
+        <tt>
+          {blockHeight &&
+          blockHeight !== 'Latest' &&
+          getBlockExplorerUrl(apiEndpoint, parseInt(blockHeight)) ? (
+            <a
+              href={getBlockExplorerUrl(apiEndpoint, parseInt(blockHeight))}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'inherit', textDecoration: 'underline' }}
+            >
+              {blockHeight}
+            </a>
+          ) : (
+            blockHeight || 'Latest'
+          )}
+        </tt>
       </Box>
 
       {/* Toggle Switch */}

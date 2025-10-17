@@ -28,7 +28,10 @@ export const decodeValues = (values: string[]): object | unknown[] => {
       JSON.stringify(unmarshalledValues, bigIntReplacer),
     ) as object; // Assume the primary goal is an object structure
   } catch (e) {
-    console.warn('Failed to unserialize CapData, falling back to JSON.parse:', e);
+    console.warn(
+      'Failed to unserialize CapData, falling back to JSON.parse:',
+      e,
+    );
     // Fallback returns an array of parsed values. Use 'unknown[]' for safety.
     return values.map((v) => {
       try {

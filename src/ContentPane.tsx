@@ -11,6 +11,7 @@ interface ContentPaneProps {
 }
 
 const ContentPane: React.FC<ContentPaneProps> = ({ blockHeight, values, apiEndpoint }) => {
+}) => {
   console.debug('ContentPane', { blockHeight, values });
   const [showRaw, setShowRaw] = useState(false);
 
@@ -88,8 +89,6 @@ const ContentPane: React.FC<ContentPaneProps> = ({ blockHeight, values, apiEndpo
           <ReactJson
             src={rawValues}
             name={null}
-            theme="rjv-default"
-            indentWidth={2}
             collapsed={false}
             enableClipboard={true} // Enable clipboard for raw data
             displayObjectSize={true}
@@ -113,9 +112,8 @@ const ContentPane: React.FC<ContentPaneProps> = ({ blockHeight, values, apiEndpo
             <ReactJson
               src={v}
               name={null}
-              theme="rjv-default"
-              indentWidth={2}
               collapsed={false}
+              quotesOnKeys={false}
               enableClipboard={false}
               displayObjectSize={false}
               displayDataTypes={false}

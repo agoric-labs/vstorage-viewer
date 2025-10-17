@@ -35,3 +35,8 @@ input:focus {
   border-color: #ccc; /* Neutral color for border */
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); /* White shadow for focus */
 }
+
+.react-json-view .object-key-val {
+  /* force override of the 20px style attribute to left-align with object-variable row */
+  padding-left: 3px !important;
+}

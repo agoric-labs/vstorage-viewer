@@ -87,35 +87,37 @@ const App = () => {
           params: { height: height.toString() },
         }),
       });
-      
+
       const data = await response.json();
       if (data.result && data.result.block && data.result.block.header) {
         const timestamp = data.result.block.header.time;
         const blockDate = new Date(timestamp);
         const now = new Date();
-        
+
         // Format date with user's local timezone
         const formattedDate = blockDate.toLocaleString();
-        
+
         // Calculate days ago
         const diffTime = now.getTime() - blockDate.getTime();
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        
+
         let timeAgo = '';
         if (diffDays === 0) {
           const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
           if (diffHours === 0) {
             const diffMinutes = Math.floor(diffTime / (1000 * 60));
-            timeAgo = diffMinutes <= 1 ? '(just now)' : `(${diffMinutes} min ago)`;
+            timeAgo =
+              diffMinutes <= 1 ? '(just now)' : `(${diffMinutes} min ago)`;
           } else {
-            timeAgo = diffHours === 1 ? '(1 hour ago)' : `(${diffHours} hours ago)`;
+            timeAgo =
+              diffHours === 1 ? '(1 hour ago)' : `(${diffHours} hours ago)`;
           }
         } else if (diffDays === 1) {
           timeAgo = '(1 day ago)';
         } else {
           timeAgo = `(${diffDays} days ago)`;
         }
-        
+
         setBlockTime(`${formattedDate} ${timeAgo}`);
       }
     } catch (error) {
@@ -242,17 +244,22 @@ const App = () => {
         width: '100%',
       }}
     >
-      <AppBar position="fixed" sx={{ bgcolor: getNetworkColor(apiEndpoint), zIndex: 1100 }}>
+      <AppBar
+        position="fixed"
+        sx={{ bgcolor: getNetworkColor(apiEndpoint), zIndex: 1100 }}
+      >
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             VStorage Explorer
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
             <Typography variant="body1" sx={{ mr: 2 }}>
-              Height: {currentBlockHeight && getBlockExplorerUrl(apiEndpoint, currentBlockHeight) ? (
-                <a 
-                  href={getBlockExplorerUrl(apiEndpoint, currentBlockHeight)} 
-                  target="_blank" 
+              Height:{' '}
+              {currentBlockHeight &&
+              getBlockExplorerUrl(apiEndpoint, currentBlockHeight) ? (
+                <a
+                  href={getBlockExplorerUrl(apiEndpoint, currentBlockHeight)}
+                  target="_blank"
                   rel="noopener noreferrer"
                   style={{ color: 'inherit', textDecoration: 'underline' }}
                 >
@@ -326,7 +333,10 @@ const App = () => {
             onChange={handleEndpointChange}
             displayEmpty
             inputProps={{ 'aria-label': 'Without label' }}
-            style={{ color: 'white', backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+            style={{
+              color: 'white',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            }}
           >
             {apiEndpoints.map((endpoint) => (
               <MenuItem key={endpoint.value} value={endpoint.value}>
@@ -359,7 +369,12 @@ const App = () => {
         defaultSize="50%"
         minSize={100}
         maxSize={400}
-        style={{ position: 'relative', width: '100%', height: 'calc(100% - 64px)', marginTop: '64px' }}
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: 'calc(100% - 64px)',
+          marginTop: '64px',
+        }}
       >
         <MillerColumns
           columns={columns}

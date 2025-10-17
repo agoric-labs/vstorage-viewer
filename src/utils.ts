@@ -1,10 +1,15 @@
-export const getBlockExplorerUrl = (endpoint: string, blockHeight: number): string => {
+export const getBlockExplorerUrl = (
+  endpoint: string,
+  blockHeight: number,
+): string => {
   // Extract network prefix from RPC endpoint
   const match = endpoint.match(/https:\/\/(.*?)\.rpc\.agoric\.net/);
   if (match) {
     const networkPrefix = match[1];
     // Special case for mainnet which uses 'followmain' in explorer
-    const explorerPrefix = networkPrefix.startsWith('main') ? 'followmain' : networkPrefix;
+    const explorerPrefix = networkPrefix.startsWith('main')
+      ? 'followmain'
+      : networkPrefix;
     return `https://${explorerPrefix}.explorer.agoric.net/agoric/block/${blockHeight}`;
   }
   return '';
@@ -34,7 +39,7 @@ export const getNetworkColor = (endpoint: string): string => {
   if (endpoint.includes('localhost')) {
     return '#616161'; // Gray for localhost
   }
-  
+
   // Default fallback color
   return '#BB2D40';
 };

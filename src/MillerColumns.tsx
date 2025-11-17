@@ -97,7 +97,7 @@ const MillerColumns: FC<MillerColumnsProps> = ({ columns, onItemSelected }) => {
       display="flex"
       height="100%"
       width="100%"
-      overflow="hidden"
+      overflow="auto"
       bgcolor="#f7f7f7"
       position="relative"
     >
